@@ -19,6 +19,11 @@ def split_phrases(text, max_words=8):
         for c in clauses:
             words = c.split()
             for i in range(0, len(words), max_words):
+                # if cutting here would orphan a tiny remainder (<3 words),
+                # extend this chunk to absorb it (at most max_words+2 words)
+                if 0 < len(words) - (i + max_words) < 3:
+                    phrases.append(" ".join(words[i:]))
+                    break
                 chunk = " ".join(words[i:i + max_words])
                 if chunk:
                     phrases.append(chunk)
@@ -60,15 +65,17 @@ def fmt(seconds):
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
 
 # Write VTT (clean, readable subtitles)
+# NOTE: each cue ends 80ms early (except the last) so consecutive cues never
+# stack on boundary frames.
 with open("captions.vtt", "w", encoding="utf-8") as f:
     f.write("WEBVTT\n\n")
     t = 0.0
-    for sentence, duration, _ in segments:
+    for n, (sentence, duration, _) in enumerate(segments):
         if not sentence:
             t += duration
             continue
         start = fmt(t)
-        end = fmt(t + duration)
+        end = fmt(t + duration - (0.0 if n == len(segments) - 1 else 0.08))
         f.write(f"{start} --> {end}\n")
         f.write(f"{sentence}\n\n")
         t += duration
@@ -98,12 +105,12 @@ with open("captions.ass", "w", encoding="utf-8") as f:
     f.write("\n[Events]\n")
     f.write("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n")
     t = 0.0
-    for sentence, duration, _ in segments:
+    for n, (sentence, duration, _) in enumerate(segments):
         if not sentence:
             t += duration
             continue
         start = fmt(t)
-        end = fmt(t + duration)
+        end = fmt(t + duration - (0.0 if n == len(segments) - 1 else 0.08))
         f.write(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{sentence}\n")
         t += duration
 
