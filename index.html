@@ -40,16 +40,16 @@
     <div class="bg-grid"></div>
 
     <!-- Audio Track synced automatically from edge-tts output -->
-    <audio class="clip" data-start="0" data-duration="15" data-track-index="0" src="voiceover.mp3"></audio>
+    <audio id="voiceover" class="clip" data-start="0" data-duration="15" data-track-index="0" src="voiceover.mp3"></audio>
 
     <!-- SCENE 1: 0s to 5s (The Hook) -->
-    <div id="scene-1" class="clip" data-start="0" data-duration="5" data-track-index="1">
+    <div id="scene-1" class="clip" data-start="0" data-duration="5" data-track-index="1" data-composition-id="scene-1">
       <div class="badge" id="s1-badge">Economics Breakdown</div>
       <h1 class="title" id="s1-title">WHY SPEND <span class="accent">BILLIONS</span> ON EXTREME SPORTS?</h1>
     </div>
 
     <!-- SCENE 2: 5s to 10.5s (The Unit Economics Bar Chart) -->
-    <div id="scene-2" class="clip" data-start="5" data-duration="5.5" data-track-index="1">
+    <div id="scene-2" class="clip" data-start="5" data-duration="5.5" data-track-index="1" data-composition-id="scene-2">
       <h1 class="title" id="s2-title" style="font-size: 72px;">NOT A <span class="red">DRINK</span> COMPANY</h1>
       <div class="card" id="s2-card">
         <div class="bar-label"><span>Cost to Make Can</span><span class="accent">$0.09</span></div>
@@ -64,7 +64,7 @@
     </div>
 
     <!-- SCENE 3: 10.5s to 15s (The Payoff) -->
-    <div id="scene-3" class="clip" data-start="10.5" data-duration="4.5" data-track-index="1">
+    <div id="scene-3" class="clip" data-start="10.5" data-duration="4.5" data-track-index="1" data-composition-id="scene-3">
       <div class="badge" id="s3-badge">The Verdict</div>
       <h1 class="title" id="s3-title">YOU AREN'T BUYING <span class="red">CAFFEINE.</span><br><br>YOU'RE BUYING <span class="accent">ADRENALINE.</span></h1>
     </div>
