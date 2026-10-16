@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Red Bull Strategy Short</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #07090e; overflow: hidden; font-family: 'Inter', sans-serif; }
+    .bg-grid {
+      position: absolute; inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .clip { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px; }
+    .badge {
+      background: rgba(255, 20, 60, 0.15); border: 2px solid #ff143c; color: #ff143c;
+      padding: 12px 28px; border-radius: 999px; font-weight: 800; font-size: 32px;
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px;
+    }
+    .title { color: #ffffff; font-size: 86px; font-weight: 900; text-align: center; line-height: 1.08; letter-spacing: -2px; }
+    .accent { color: #ffcc00; }
+    .red { color: #ff143c; }
+    .card {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 32px; padding: 48px; margin-top: 40px;
+    }
+    .bar-label { display: flex; justify-content: space-between; color: #fff; font-size: 38px; font-weight: 800; margin-bottom: 18px; }
+    .bar-bg { width: 100%; height: 44px; background: rgba(255,255,255,0.08); border-radius: 22px; overflow: hidden; margin-bottom: 36px; }
+    .bar-fill { height: 100%; width: 0%; border-radius: 22px; }
+  </style>
+</head>
+<body>
+  <!-- Root Composition: 1080x1920 Vertical Short, 15s total -->
+  <div id="root" data-composition-id="short-video" data-width="1080" data-height="1920" data-fps="60" data-duration="15" style="position:relative; width:1080px; height:1920px; overflow:hidden; background:#07090e;">
+    
+    <div class="bg-grid"></div>
+
+    <!-- Audio Track synced automatically from edge-tts output -->
+    <audio class="clip" data-start="0" data-duration="15" data-track-index="0" src="voiceover.mp3"></audio>
+
+    <!-- SCENE 1: 0s to 5s (The Hook) -->
+    <div id="scene-1" class="clip" data-start="0" data-duration="5" data-track-index="1">
+      <div class="badge" id="s1-badge">Economics Breakdown</div>
+      <h1 class="title" id="s1-title">WHY SPEND <span class="accent">BILLIONS</span> ON EXTREME SPORTS?</h1>
+    </div>
+
+    <!-- SCENE 2: 5s to 10.5s (The Unit Economics Bar Chart) -->
+    <div id="scene-2" class="clip" data-start="5" data-duration="5.5" data-track-index="1">
+      <h1 class="title" id="s2-title" style="font-size: 72px;">NOT A <span class="red">DRINK</span> COMPANY</h1>
+      <div class="card" id="s2-card">
+        <div class="bar-label"><span>Cost to Make Can</span><span class="accent">$0.09</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-cost" style="background:#38bdf8;"></div></div>
+        
+        <div class="bar-label"><span>Retail Price</span><span class="accent">$3.59</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-price" style="background:#ffcc00;"></div></div>
+
+        <div class="bar-label"><span>Marketing Reinvestment</span><span class="red">30%</span></div>
+        <div class="bar-bg" style="margin-bottom:0;"><div class="bar-fill" id="bar-mkt" style="background:#ff143c;"></div></div>
+      </div>
+    </div>
+
+    <!-- SCENE 3: 10.5s to 15s (The Payoff) -->
+    <div id="scene-3" class="clip" data-start="10.5" data-duration="4.5" data-track-index="1">
+      <div class="badge" id="s3-badge">The Verdict</div>
+      <h1 class="title" id="s3-title">YOU AREN'T BUYING <span class="red">CAFFEINE.</span><br><br>YOU'RE BUYING <span class="accent">ADRENALINE.</span></h1>
+    </div>
+
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+
+    // Scene 1 Timeline (0s - 5s)
+    const tl1 = gsap.timeline({ paused: true });
+    tl1.from("#s1-badge", { scale: 0.5, opacity: 0, duration: 0.5, ease: "back.out(1.7)" })
+       .from("#s1-title", { y: 80, opacity: 0, duration: 0.7, ease: "power4.out" }, "-=0.2")
+       .to("#scene-1", { scale: 1.08, opacity: 0, duration: 0.4, ease: "power2.in" }, 4.5);
+    window.__timelines["scene-1"] = tl1;
+
+    // Scene 2 Timeline (5s - 10.5s)
+    const tl2 = gsap.timeline({ paused: true });
+    tl2.from("#s2-title", { y: -50, opacity: 0, duration: 0.5, ease: "power3.out" })
+       .from("#s2-card", { y: 100, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.2")
+       .to("#bar-cost", { width: "8%", duration: 0.8, ease: "power2.out" }, 0.6)
+       .to("#bar-price", { width: "92%", duration: 1.0, ease: "power2.out" }, 1.0)
+       .to("#bar-mkt", { width: "65%", duration: 1.0, ease: "power2.out" }, 1.5)
+       .to("#scene-2", { y: -60, opacity: 0, duration: 0.4, ease: "power2.in" }, 5.0);
+    window.__timelines["scene-2"] = tl2;
+
+    // Scene 3 Timeline (10.5s - 15s)
+    const tl3 = gsap.timeline({ paused: true });
+    tl3.from("#s3-badge", { scale: 0, opacity: 0, duration: 0.4, ease: "back.out(2)" })
+       .from("#s3-title", { scale: 0.85, opacity: 0, duration: 0.7, ease: "elastic.out(1, 0.6)" }, "-=0.1");
+    window.__timelines["scene-3"] = tl3;
+  </script>
+</body>
+</html>

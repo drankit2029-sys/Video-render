@@ -1,0 +1,52 @@
+name: Render HyperFrames Short
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual 1-click trigger from GitHub UI or mobile app
+
+jobs:
+  render-video:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 3. Install System Dependencies (FFmpeg & Python Edge-TTS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2t64
+          pip install edge-tts
+
+      - name: 4. Generate Free Voiceover from script.txt
+        run: |
+          edge-tts --voice en-US-ChristopherNeural --rate="+10%" --file script.txt --write-media voiceover.mp3 --write-subtitles captions.vtt
+
+      - name: 5. Install HyperFrames CLI & Headless Browser
+        env:
+          HYPERFRAMES_NO_UPDATE_CHECK: 1
+        run: |
+          npm install -g hyperframes
+          npx hyperframes browser ensure
+
+      - name: 6. Lint & Render 60fps YouTube Short MP4
+        env:
+          HYPERFRAMES_NO_UPDATE_CHECK: 1
+        run: |
+          npx hyperframes lint
+          npx hyperframes render --fps 60 --quality high --workers 4 --output final_short.mp4
+
+      - name: 7. Upload Rendered MP4 as Downloadable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-short-mp4
+          path: |
+            final_short.mp4
+            captions.vtt
+          retention-days: 7
