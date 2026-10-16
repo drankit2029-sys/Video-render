@@ -2,99 +2,185 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Red Bull Strategy Short</title>
+  <title>Red Bull Strategy — Apple Glass Short</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #07090e; overflow: hidden; font-family: 'Inter', sans-serif; }
-    .bg-grid {
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0c; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+
+    #root {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: radial-gradient(1200px 900px at 50% -10%, #1a1a2e 0%, #0a0a0c 60%);
+    }
+
+    /* Subtle grid texture */
+    .glass-bg {
       position: absolute; inset: 0;
-      background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
     }
-    .clip { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px; }
-    .badge {
-      background: rgba(255, 20, 60, 0.15); border: 2px solid #ff143c; color: #ff143c;
-      padding: 12px 28px; border-radius: 999px; font-weight: 800; font-size: 32px;
-      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px;
+
+    /* Base clip: every scene is a glass card floating in space */
+    .clip {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 860px;
+      max-width: 92vw;
+      padding: 44px;
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(28px) saturate(1.15);
+      -webkit-backdrop-filter: blur(28px) saturate(1.15);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04) inset;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
     }
-    .title { color: #ffffff; font-size: 86px; font-weight: 900; text-align: center; line-height: 1.08; letter-spacing: -2px; }
-    .accent { color: #ffcc00; }
-    .red { color: #ff143c; }
-    .card {
-      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 32px; padding: 48px; margin-top: 40px;
+
+    .clip.visible { visibility: inherit; }
+
+    /* Kicker / badge */
+    .kicker {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 24px;
+      text-align: center;
     }
-    .bar-label { display: flex; justify-content: space-between; color: #fff; font-size: 38px; font-weight: 800; margin-bottom: 18px; }
-    .bar-bg { width: 100%; height: 44px; background: rgba(255,255,255,0.08); border-radius: 22px; overflow: hidden; margin-bottom: 36px; }
-    .bar-fill { height: 100%; width: 0%; border-radius: 22px; }
+
+    /* Main title */
+    .title {
+      color: #ffffff;
+      font-size: 56px;
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -0.8px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .accent { color: #ffffff; }
+
+    /* Stat row */
+    .stats {
+      width: 100%;
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .stat {
+      flex: 1;
+      background: rgba(0,0,0,0.20);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      display: block;
+      color: #ffffff;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-label {
+      color: rgba(255,255,255,0.45);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* Audio track */
+    audio { display: none; }
+
   </style>
 </head>
 <body>
-  <!-- Root Composition: 1080x1920 Vertical Short, 15s total -->
-  <div id="root" data-composition-id="short-video" data-width="1080" data-height="1920" data-fps="60" data-duration="15" style="position:relative; width:1080px; height:1920px; overflow:hidden; background:#07090e;">
-    
-    <div class="bg-grid"></div>
+  <div id="root" data-composition-id="short-video" data-width="1080" data-height="1920" data-fps="60" data-duration="15">
+    <div class="glass-bg"></div>
 
-    <!-- Audio Track synced automatically from edge-tts output -->
-    <audio id="voiceover" class="clip" data-start="0" data-duration="15" data-track-index="0" src="voiceover.mp3"></audio>
+    <audio id="voiceover" data-start="0" data-duration="15" data-track-index="0" src="voiceover.mp3"></audio>
 
-    <!-- SCENE 1: 0s to 5s (The Hook) -->
+    <!-- SCENE 1: 0s - 5s Hook -->
     <div id="scene-1" class="clip" data-start="0" data-duration="5" data-track-index="1" data-composition-id="scene-1">
-      <div class="badge" id="s1-badge">Economics Breakdown</div>
-      <h1 class="title" id="s1-title">WHY SPEND <span class="accent">BILLIONS</span> ON EXTREME SPORTS?</h1>
+      <div class="kicker">Brand Strategy</div>
+      <div class="title">Red Bull spends <span class="accent">billions</span> on extreme sports.</div>
     </div>
 
-    <!-- SCENE 2: 5s to 10.5s (The Unit Economics Bar Chart) -->
-    <div id="scene-2" class="clip" data-start="5" data-duration="5.5" data-track-index="1" data-composition-id="scene-2">
-      <h1 class="title" id="s2-title" style="font-size: 72px;">NOT A <span class="red">DRINK</span> COMPANY</h1>
-      <div class="card" id="s2-card">
-        <div class="bar-label"><span>Cost to Make Can</span><span class="accent">$0.09</span></div>
-        <div class="bar-bg"><div class="bar-fill" id="bar-cost" style="background:#38bdf8;"></div></div>
-        
-        <div class="bar-label"><span>Retail Price</span><span class="accent">$3.59</span></div>
-        <div class="bar-bg"><div class="bar-fill" id="bar-price" style="background:#ffcc00;"></div></div>
-
-        <div class="bar-label"><span>Marketing Reinvestment</span><span class="red">30%</span></div>
-        <div class="bar-bg" style="margin-bottom:0;"><div class="bar-fill" id="bar-mkt" style="background:#ff143c;"></div></div>
+    <!-- SCENE 2: 5s - 10s Unit Economics -->
+    <div id="scene-2" class="clip" data-start="5" data-duration="5" data-track-index="1" data-composition-id="scene-2">
+      <div class="kicker">Unit Economics</div>
+      <div class="title">Not a <span class="accent">drink</span> company.</div>
+      <div class="stats">
+        <div class="stat"><span class="stat-value">$0.09</span><span class="stat-label">cost to make</span></div>
+        <div class="stat"><span class="stat-value">$3.59</span><span class="stat-label">retail price</span></div>
+        <div class="stat"><span class="stat-value">30%</span><span class="stat-label">adrenaline marketing</span></div>
       </div>
     </div>
 
-    <!-- SCENE 3: 10.5s to 15s (The Payoff) -->
-    <div id="scene-3" class="clip" data-start="10.5" data-duration="4.5" data-track-index="1" data-composition-id="scene-3">
-      <div class="badge" id="s3-badge">The Verdict</div>
-      <h1 class="title" id="s3-title">YOU AREN'T BUYING <span class="red">CAFFEINE.</span><br><br>YOU'RE BUYING <span class="accent">ADRENALINE.</span></h1>
+    <!-- SCENE 3: 10s - 15s Payoff -->
+    <div id="scene-3" class="clip" data-start="10" data-duration="5" data-track-index="1" data-composition-id="scene-3">
+      <div class="kicker">The Verdict</div>
+      <div class="title">You aren't buying <span class="accent">caffeine.</span><br>You're buying <span class="accent">adrenaline.</span></div>
     </div>
-
   </div>
 
   <script>
     window.__timelines = window.__timelines || {};
 
-    // Scene 1 Timeline (0s - 5s)
+    const easeInOut = "power3.inOut";
+
+    // Scene 1 (0 - 5s): fade up + slight scale
     const tl1 = gsap.timeline({ paused: true });
-    tl1.from("#s1-badge", { scale: 0.5, opacity: 0, duration: 0.5, ease: "back.out(1.7)" })
-       .from("#s1-title", { y: 80, opacity: 0, duration: 0.7, ease: "power4.out" }, "-=0.2")
-       .to("#scene-1", { scale: 1.08, opacity: 0, duration: 0.4, ease: "power2.in" }, 4.5);
+    tl1.from("#scene-1", {
+      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut, clearProps: "opacity,visibility"
+    })
+    .from("#scene-1 .kicker", { y: 18, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.55")
+    .from("#scene-1 .title", { y: 24, opacity: 0, duration: 0.7, ease: "power3.out" }, "-=0.45")
+    .to("#scene-1", { opacity: 0, scale: 0.98, duration: 0.5, ease: "power2.in", clearProps: "opacity,visibility" }, 4.5);
     window.__timelines["scene-1"] = tl1;
 
-    // Scene 2 Timeline (5s - 10.5s)
+    // Scene 2 (5 - 10s): fade up + stats stagger
     const tl2 = gsap.timeline({ paused: true });
-    tl2.from("#s2-title", { y: -50, opacity: 0, duration: 0.5, ease: "power3.out" })
-       .from("#s2-card", { y: 100, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.2")
-       .to("#bar-cost", { width: "8%", duration: 0.8, ease: "power2.out" }, 0.6)
-       .to("#bar-price", { width: "92%", duration: 1.0, ease: "power2.out" }, 1.0)
-       .to("#bar-mkt", { width: "65%", duration: 1.0, ease: "power2.out" }, 1.5)
-       .to("#scene-2", { y: -60, opacity: 0, duration: 0.4, ease: "power2.in" }, 5.0);
+    tl2.from("#scene-2", {
+      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut, clearProps: "opacity,visibility"
+    }, 0)
+    .from("#scene-2 .kicker", { y: 18, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.55")
+    .from("#scene-2 .title", { y: 24, opacity: 0, duration: 0.7, ease: "power3.out" }, "-=0.45")
+    .from("#scene-2 .stat", { y: 20, opacity: 0, duration: 0.55, ease: "power3.out", stagger: 0.12 }, "-=0.35")
+    .to("#scene-2", { opacity: 0, scale: 0.98, duration: 0.5, ease: "power2.in", clearProps: "opacity,visibility" }, 4.5);
     window.__timelines["scene-2"] = tl2;
 
-    // Scene 3 Timeline (10.5s - 15s)
+    // Scene 3 (10 - 15s): fade up + hold
     const tl3 = gsap.timeline({ paused: true });
-    tl3.from("#s3-badge", { scale: 0, opacity: 0, duration: 0.4, ease: "back.out(2)" })
-       .from("#s3-title", { scale: 0.85, opacity: 0, duration: 0.7, ease: "elastic.out(1, 0.6)" }, "-=0.1");
+    tl3.from("#scene-3", {
+      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut, clearProps: "opacity,visibility"
+    }, 0)
+    .from("#scene-3 .kicker", { y: 18, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.55")
+    .from("#scene-3 .title", { y: 24, opacity: 0, duration: 0.7, ease: "power3.out" }, "-=0.45");
     window.__timelines["scene-3"] = tl3;
   </script>
 </body>

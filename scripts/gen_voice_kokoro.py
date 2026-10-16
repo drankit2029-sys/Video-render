@@ -7,18 +7,30 @@ import soundfile as sf
 text = open("script.txt", encoding="utf-8").read().strip()
 pipeline = KPipeline(lang_code="a")
 
-# Split into sentences for finer subtitle granularity
-sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+# Split into short, readable phrases (max ~12 words) for professional subtitle timing
+def split_phrases(text, max_words=12):
+    # First split on sentence boundaries
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+    phrases = []
+    for s in sentences:
+        words = s.split()
+        for i in range(0, len(words), max_words):
+            chunk = " ".join(words[i:i + max_words])
+            if chunk:
+                phrases.append(chunk)
+    return phrases
+
+phrases = split_phrases(text, max_words=11)
 
 segments = []
-for idx, sentence in enumerate(sentences):
-    gen = pipeline(sentence, voice="af_heart", speed=1.0, split_pattern=r"\n+")
+for idx, phrase in enumerate(phrases):
+    gen = pipeline(phrase, voice="af_heart", speed=1.0, split_pattern=r"\n+")
     for j, (gs, ps, audio) in enumerate(gen):
         seg_path = f"seg_{idx}_{j}.wav"
         sf.write(seg_path, audio, 24000)
         duration = len(audio) / 24000.0
-        segments.append((sentence, duration, seg_path))
-        print(f"seg {idx}_{j}: {sentence[:50]}... ({duration:.2f}s)")
+        segments.append((phrase, duration, seg_path))
+        print(f"seg {idx}_{j}: {phrase[:50]}... ({duration:.2f}s)")
 
 # Concatenate all segment WAVs into one voiceover WAV
 with open("seg_list.txt", "w") as f:
@@ -36,7 +48,6 @@ subprocess.run(
     check=True,
 )
 
-# Write VTT subtitles
 def fmt(seconds):
     h = int(seconds // 3600)
     m = int((seconds % 3600) // 60)
@@ -44,6 +55,7 @@ def fmt(seconds):
     ms = int((seconds - int(seconds)) * 1000)
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
 
+# Write VTT (clean, readable subtitles)
 with open("captions.vtt", "w", encoding="utf-8") as f:
     f.write("WEBVTT\n\n")
     t = 0.0
@@ -57,5 +69,34 @@ with open("captions.vtt", "w", encoding="utf-8") as f:
         f.write(f"{sentence}\n\n")
         t += duration
 
+# Write ASS for professional burn-in styling (background box, crisp outline)
+ass_style = (
+    "Style: Default,Inter,36,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,"
+    "-1,0,0,0,100,100,1,2.2,2.2,2,7,7,40,1\n"
+)
+with open("captions.ass", "w", encoding="utf-8") as f:
+    f.write("[Script Info]\n")
+    f.write("Title: Subtitles\n")
+    f.write("ScriptType: v4.00+\n")
+    f.write("WrapStyle: 0\n")
+    f.write("ScaledBorderAndShadow: yes\n")
+    f.write("YCbCr Matrix: TV.601\n")
+    f.write("PlayResX: 1080\n")
+    f.write("PlayResY: 1920\n")
+    f.write("\n[V4+ Styles]\n")
+    f.write("Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n")
+    f.write(ass_style)
+    f.write("\n[Events]\n")
+    f.write("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n")
+    t = 0.0
+    for sentence, duration, _ in segments:
+        if not sentence:
+            t += duration
+            continue
+        start = fmt(t)
+        end = fmt(t + duration)
+        f.write(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{sentence}\n")
+        t += duration
+
 print(f"Total duration: {t:.2f}s")
-print("Generated voiceover.mp3 and captions.vtt")
+print("Generated voiceover.mp3, captions.vtt, captions.ass")

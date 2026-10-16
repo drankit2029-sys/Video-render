@@ -3,7 +3,7 @@ name: Render HyperFrames Short
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # Allows manual 1-click trigger from GitHub UI or mobile app
+  workflow_dispatch:
 
 jobs:
   render-video:
@@ -17,43 +17,55 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
 
-      - name: 3. Install System Dependencies (FFmpeg, espeak-ng, browser libs)
+      - name: 3. Cache pip & Kokoro model weights
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.cache/huggingface
+          key: kokoro-deps-${{ runner.os }}-${{ hashFiles('scripts/gen_voice_kokoro.py') }}
+          restore-keys: |
+            kokoro-deps-${{ runner.os }}-
+
+      - name: 4. Install System Dependencies (FFmpeg, espeak-ng, browser libs)
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg espeak-ng libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2t64
 
-      - name: 4. Install Python Kokoro TTS
+      - name: 5. Install Python Kokoro TTS
         run: |
           pip install kokoro soundfile
 
-      - name: 5. Generate Voiceover & Subtitles with Kokoro TTS
+      - name: 6. Generate Voiceover & Subtitles with Kokoro TTS
         run: |
           python scripts/gen_voice_kokoro.py
 
-      - name: 6. Install HyperFrames CLI & Headless Browser
+      - name: 7. Install HyperFrames CLI & Headless Browser
         env:
           HYPERFRAMES_NO_UPDATE_CHECK: 1
         run: |
           npm install -g hyperframes
           npx hyperframes browser ensure
 
-      - name: 7. Lint & Render 60fps YouTube Short MP4
+      - name: 8. Lint & Render 60fps YouTube Short MP4
         env:
           HYPERFRAMES_NO_UPDATE_CHECK: 1
         run: |
           npx hyperframes lint
           npx hyperframes render --fps 60 --quality high --workers 4 --output final_short_raw.mp4
 
-      - name: 8. Burn Subtitles into Rendered Video
+      - name: 9. Burn Professional Subtitles into Rendered Video
         run: |
-          ffmpeg -y -i final_short_raw.mp4 -vf "subtitles=captions.vtt:force_style='FontSize=28,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,Outline=2,Shadow=1,Alignment=2,MarginV=70,BorderStyle=1'" -c:a copy -movflags +faststart final_short.mp4
+          ffmpeg -y -i final_short_raw.mp4 -vf "ass=captions.ass" -c:a copy -movflags +faststart final_short.mp4
 
-      - name: 9. Upload Rendered MP4 as Downloadable Artifact
+      - name: 10. Upload Rendered MP4 as Downloadable Artifact
         uses: actions/upload-artifact@v4
         with:
           name: youtube-short-mp4
           path: |
             final_short.mp4
+            captions.ass
             captions.vtt
           retention-days: 7
