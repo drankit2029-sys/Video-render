@@ -38,10 +38,22 @@ subprocess.run(
     check=True,
 )
 
-# --- 2. Word-level timestamps via faster-whisper STT on the rendered voiceover
+# --- 2. Word-level timestamps via faster-whisper STT on the rendered voiceover.
+# NOTE: decoded to a 16kHz mono array with ffmpeg/soundfile and passed as an
+# ndarray on purpose — faster-whisper's PyAV-based file decoder breaks across
+# av library versions, while the ndarray path needs no av at all.
+subprocess.run(
+    ["ffmpeg", "-y", "-i", "voiceover.wav", "-ar", "16000", "-ac", "1",
+     "voiceover_16k.wav"],
+    check=True,
+)
+audio16k, _sr = sf.read("voiceover_16k.wav", dtype="float32")
+if audio16k.ndim > 1:
+    audio16k = audio16k.mean(axis=1)
+
 model = WhisperModel("tiny.en", device="cpu", compute_type="int8")
 whisper_segments, info = model.transcribe(
-    "voiceover.wav", word_timestamps=True, vad_filter=True
+    audio16k, word_timestamps=True, vad_filter=True
 )
 words = []
 for seg in whisper_segments:
