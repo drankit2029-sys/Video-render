@@ -7,21 +7,24 @@ import soundfile as sf
 text = open("script.txt", encoding="utf-8").read().strip()
 pipeline = KPipeline(lang_code="a")
 
-# Split into short, readable phrases (max ~7 words) so subtitle lines fit the
-# 1080px canvas and stay readable at large font sizes
-def split_phrases(text, max_words=12):
-    # First split on sentence boundaries
+# Split into short, natural phrases for professional subtitle timing.
+# Break on sentence boundaries first, then on clause boundaries (, ; —),
+# and only hard-chunk on word count as a last resort.
+def split_phrases(text, max_words=8):
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
     phrases = []
     for s in sentences:
-        words = s.split()
-        for i in range(0, len(words), max_words):
-            chunk = " ".join(words[i:i + max_words])
-            if chunk:
-                phrases.append(chunk)
+        clauses = [c.strip() for c in re.split(r"\s*(?:;|—|--)\s*|\s*,\s*", s) if c.strip()]
+        # re-attach trailing punctuation stripped by the split
+        for c in clauses:
+            words = c.split()
+            for i in range(0, len(words), max_words):
+                chunk = " ".join(words[i:i + max_words])
+                if chunk:
+                    phrases.append(chunk)
     return phrases
 
-phrases = split_phrases(text, max_words=7)
+phrases = split_phrases(text, max_words=8)
 
 segments = []
 for idx, phrase in enumerate(phrases):
@@ -106,3 +109,38 @@ with open("captions.ass", "w", encoding="utf-8") as f:
 
 print(f"Total duration: {t:.2f}s")
 print("Generated voiceover.mp3, captions.vtt, captions.ass")
+
+# Patch index.html timings so the composition always contains the full
+# voiceover (+1s tail) instead of cutting the ending off.
+import math
+
+total = t
+D = math.ceil(total + 1.0)
+D3 = round(D - 10.0, 1)
+
+with open("index.html", encoding="utf-8") as f:
+    html = f.read()
+
+html = re.sub(
+    r'(data-composition-id="short-video"[^>]*?data-duration=")[\d.]+(")',
+    rf"\g<1>{D}\g<2>",
+    html,
+    count=1,
+)
+html = re.sub(
+    r'(<audio id="voiceover"[^>]*?data-duration=")[\d.]+(")',
+    rf"\g<1>{D}\g<2>",
+    html,
+    count=1,
+)
+html = re.sub(
+    r'(id="scene-3"[^>]*?data-start=")10(" data-duration=")[\d.]+(")',
+    rf"\g<1>10\g<2>{D3}\g<3>",
+    html,
+    count=1,
+)
+
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html)
+
+print(f"Patched index.html: composition={D}s, scene-3 duration={D3}s")
