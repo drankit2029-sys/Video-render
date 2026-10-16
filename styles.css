@@ -28,7 +28,8 @@ body {
   inset: 0;
   perspective: 1200px;
   overflow: hidden;
-  transition: background 0.4s ease;
+  /* NOTE: no CSS transition here — state swaps must stay seek-deterministic
+     for the headless render workers; GSAP timelines drive all motion. */
 }
 
 .studio-light {
