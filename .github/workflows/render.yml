@@ -18,28 +18,28 @@ jobs:
         with:
           node-version: '22'
 
-      - name: 3. Cache pip & Kokoro model weights
+      - name: 3. Cache pip, Kokoro & Whisper model weights
         uses: actions/cache@v4
         with:
           path: |
             ~/.cache/pip
             ~/.cache/huggingface
-          key: kokoro-deps-${{ runner.os }}-${{ hashFiles('scripts/gen_voice_kokoro.py') }}
+          key: tts-stt-deps-${{ runner.os }}-${{ hashFiles('scripts/gen_voice.py') }}
           restore-keys: |
-            kokoro-deps-${{ runner.os }}-
+            tts-stt-deps-${{ runner.os }}-
 
       - name: 4. Install System Dependencies (FFmpeg, espeak-ng, browser libs)
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg espeak-ng libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2t64
 
-      - name: 5. Install Python Kokoro TTS
+      - name: 5. Install Python Kokoro TTS + Whisper STT
         run: |
-          pip install kokoro soundfile
+          pip install kokoro soundfile faster-whisper
 
-      - name: 6. Generate Voiceover & Subtitles with Kokoro TTS
+      - name: 6. Generate Voiceover & Word-Level Subtitles (Kokoro + Whisper)
         run: |
-          python scripts/gen_voice_kokoro.py
+          python scripts/gen_voice.py
 
       - name: 7. Install HyperFrames CLI & Headless Browser
         env:
