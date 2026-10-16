@@ -64,6 +64,16 @@ def fmt(seconds):
     ms = int((seconds - int(seconds)) * 1000)
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
 
+# ASS spec requires centiseconds (h:mm:ss.cc) — libass misparses millisecond
+# timestamps, which leaves stale cues rendered indefinitely.
+def fmt_ass(seconds):
+    total_cs = int(round(seconds * 100))
+    h = total_cs // 360000
+    m = (total_cs % 360000) // 6000
+    s = (total_cs % 6000) // 100
+    cs = total_cs % 100
+    return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
+
 # Write VTT (clean, readable subtitles)
 # NOTE: each cue ends 80ms early (except the last) so consecutive cues never
 # stack on boundary frames.
@@ -109,8 +119,8 @@ with open("captions.ass", "w", encoding="utf-8") as f:
         if not sentence:
             t += duration
             continue
-        start = fmt(t)
-        end = fmt(t + duration - (0.0 if n == len(segments) - 1 else 0.08))
+        start = fmt_ass(t)
+        end = fmt_ass(t + duration - (0.0 if n == len(segments) - 1 else 0.08))
         f.write(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{sentence}\n")
         t += duration
 
