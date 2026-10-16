@@ -21,7 +21,7 @@ body {
 }
 
 /* ==========================================================================
-   ARCHITECTURAL TILE STUDIO ENVIRONMENT (Matches 00:04 & 00:22 of video)
+   ARCHITECTURAL TILE STUDIO ENVIRONMENT
    ========================================================================== */
 #studio-env {
   position: absolute;
@@ -40,7 +40,6 @@ body {
   background: radial-gradient(circle at 50% 45%, #16181d 0%, #050608 100%);
 }
 
-/* Back Ceramic Tile Wall */
 .wall-tiles {
   position: absolute;
   top: 0;
@@ -59,7 +58,6 @@ body {
     linear-gradient(90deg, rgba(255, 255, 255, 0.08) 2px, transparent 2px);
 }
 
-/* 3D Perspective Countertop / Floor Tile Plane */
 .floor-plane {
   position: absolute;
   bottom: -15%;
@@ -108,7 +106,6 @@ body {
   opacity: 0.05;
 }
 
-/* Full-screen Prismatic Chromatic Aberration Ring (Matches 00:15 & 00:25) */
 #prismatic-pulse {
   position: absolute;
   top: 50%;
@@ -132,7 +129,7 @@ body {
 }
 
 /* ==========================================================================
-   SCENE LAYOUT & APPLE LIQUID GLASS MATERIAL SYSTEM
+   APPLE LIQUID GLASS MATERIAL SYSTEM
    ========================================================================== */
 .clip {
   position: absolute;
@@ -156,7 +153,6 @@ body {
   justify-content: center;
 }
 
-/* Authentic Clear Refractive Liquid Glass Surface */
 .liquid-dock-3d,
 .liquid-pill-vertical,
 .liquid-knob,
@@ -166,9 +162,9 @@ body {
 .glass-squircle {
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.52) 0%,
-    rgba(255, 255, 255, 0.16) 45%,
-    rgba(255, 255, 255, 0.38) 100%
+    rgba(255, 255, 255, 0.54) 0%,
+    rgba(255, 255, 255, 0.18) 45%,
+    rgba(255, 255, 255, 0.40) 100%
   );
   backdrop-filter: blur(22px) saturate(190%) contrast(108%);
   -webkit-backdrop-filter: blur(22px) saturate(190%) contrast(108%);
@@ -182,7 +178,73 @@ body {
     inset -6px 0 12px rgba(200, 215, 235, 0.45);
 }
 
-/* Chromatic Iridescent Rim Glow (Matches 00:17 & 00:21) */
+/* ==========================================================================
+   REAL 3D ASSETS, BRAND VECTORS & LUCIDE ICON STYLING
+   ========================================================================== */
+.real-3d-asset {
+  width: 118px;
+  height: 118px;
+  object-fit: contain;
+  filter: drop-shadow(0 16px 24px rgba(15, 23, 42, 0.28));
+  z-index: 3;
+}
+
+.real-3d-asset-small {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.25));
+}
+
+.brand-vector-logo {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(225, 6, 0, 0.25));
+}
+
+.asset-drop-shadow {
+  filter: drop-shadow(0 18px 28px rgba(15, 23, 42, 0.25));
+}
+
+.lucide-glass-icon {
+  width: 78px;
+  height: 78px;
+  stroke-width: 1.75;
+  color: #1d1d1f;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.12));
+}
+
+.lucide-hero-atom {
+  width: 165px;
+  height: 165px;
+  stroke-width: 1.5;
+  color: #1d1d1f;
+}
+
+.lucide-hint-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.lucide-inline-lock {
+  width: 26px;
+  height: 26px;
+  vertical-align: -3px;
+  stroke-width: 2.5;
+  color: #ff2d55;
+}
+
+.apple-logo-svg {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  transform: translateY(3px);
+}
+
+/* Chromatic Iridescent Rim Glow */
 .chromatic-rim {
   position: absolute;
   inset: -5px;
@@ -205,7 +267,7 @@ body {
   pointer-events: none;
 }
 
-/* SCENE 1: 3D Floating Glass Dock (Matches 00:03 - 00:09) */
+/* SCENE 1: 3D Floating Glass Dock */
 .liquid-dock-3d {
   position: relative;
   width: 880px;
@@ -239,11 +301,6 @@ body {
   transform-style: preserve-3d;
 }
 
-.glass-icon-svg {
-  width: 96px;
-  height: 96px;
-}
-
 .liquid-swell {
   position: absolute;
   inset: 0;
@@ -252,7 +309,7 @@ body {
   opacity: 0;
 }
 
-/* SCENE 2: Vertical Pill Switch ("slide to discount" - Matches 00:16 & 00:36) */
+/* SCENE 2: Vertical Pill Switch */
 .liquid-pill-vertical {
   position: relative;
   width: 260px;
@@ -277,17 +334,20 @@ body {
   font-size: 34px;
   font-weight: 600;
   letter-spacing: -1px;
-  color: rgba(29, 29, 31, 0.45);
+  color: rgba(29, 29, 31, 0.55);
   z-index: 2;
 }
 
 .pill-slide-hint {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 500;
   letter-spacing: 2px;
-  color: rgba(29, 29, 31, 0.4);
+  color: rgba(29, 29, 31, 0.42);
+  display: flex;
+  align-items: center;
+  gap: 8px;
   z-index: 2;
 }
 
@@ -304,7 +364,7 @@ body {
   background: rgba(255, 255, 255, 0.72);
 }
 
-/* SCENE 3: Vessel & Gooey Liquid Droplet Separation (Matches 00:32) */
+/* SCENE 3: Vessel & Gooey Liquid Droplet Separation */
 .liquid-vessel {
   position: relative;
   width: 300px;
@@ -318,7 +378,7 @@ body {
 
 .vessel-tag {
   position: absolute;
-  bottom: 42px;
+  bottom: 38px;
   font-size: 46px;
   font-weight: 700;
   letter-spacing: -1.5px;
@@ -327,16 +387,16 @@ body {
 
 .liquid-droplet {
   position: absolute;
-  width: 170px;
-  height: 170px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.78);
 }
 
-/* SCENE 4: Dark-Mode Grid Room & Prismatic Ring (Matches 00:20 - 00:25) */
+/* SCENE 4: Dark-Mode Grid Room & Prismatic Ring */
 .liquid-dark-orb {
   position: relative;
   width: 360px;
@@ -374,14 +434,14 @@ body {
 }
 
 .dark-squircle {
-  width: 136px;
-  height: 136px;
-  border-radius: 36px;
+  width: 146px;
+  height: 146px;
+  border-radius: 38px;
   background: rgba(255, 255, 255, 0.08);
   border: 2px solid rgba(255, 255, 255, 0.8);
 }
 
-/* SCENE 5: Monolith Flip (Matches 00:24) */
+/* SCENE 5: Monolith Flip */
 .liquid-monolith {
   position: absolute;
   width: 440px;
@@ -393,14 +453,14 @@ body {
 }
 
 .hero-monolith {
-  width: 520px;
-  height: 380px;
-  border-radius: 84px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.68) 0%, rgba(255,255,255,0.22) 100%);
+  width: 540px;
+  height: 390px;
+  border-radius: 86px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.25) 100%);
 }
 
 /* ==========================================================================
-   MINIMAL APPLE PRODUCT TYPOGRAPHY (Matches 00:14, 00:17, 00:28, 00:43)
+   MINIMAL APPLE PRODUCT TYPOGRAPHY
    ========================================================================== */
 .apple-label {
   margin-top: 20px;
@@ -409,8 +469,8 @@ body {
   letter-spacing: -1.8px;
   color: #1d1d1f;
   display: flex;
-  align-items: baseline;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
 }
 
 .label-sub {
