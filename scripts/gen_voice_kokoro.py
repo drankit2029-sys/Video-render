@@ -7,7 +7,8 @@ import soundfile as sf
 text = open("script.txt", encoding="utf-8").read().strip()
 pipeline = KPipeline(lang_code="a")
 
-# Split into short, readable phrases (max ~12 words) for professional subtitle timing
+# Split into short, readable phrases (max ~7 words) so subtitle lines fit the
+# 1080px canvas and stay readable at large font sizes
 def split_phrases(text, max_words=12):
     # First split on sentence boundaries
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
@@ -20,7 +21,7 @@ def split_phrases(text, max_words=12):
                 phrases.append(chunk)
     return phrases
 
-phrases = split_phrases(text, max_words=11)
+phrases = split_phrases(text, max_words=7)
 
 segments = []
 for idx, phrase in enumerate(phrases):
@@ -69,10 +70,15 @@ with open("captions.vtt", "w", encoding="utf-8") as f:
         f.write(f"{sentence}\n\n")
         t += duration
 
-# Write ASS for professional burn-in styling (background box, crisp outline)
+# Write ASS for professional burn-in styling (crisp outline, bottom-center).
+# Field order MUST match the Format line exactly (23 fields): Name, Fontname,
+# Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold,
+# Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle,
+# Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding.
+# Alignment=2 -> bottom-center, MarginV=180 keeps text clear of phone UI.
 ass_style = (
-    "Style: Default,Inter,36,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,"
-    "-1,0,0,0,100,100,1,2.2,2.2,2,7,7,40,1\n"
+    "Style: Default,Inter,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,"
+    "-1,0,0,0,100,100,0,0,1,3,1,2,60,60,180,1\n"
 )
 with open("captions.ass", "w", encoding="utf-8") as f:
     f.write("[Script Info]\n")

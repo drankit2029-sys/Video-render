@@ -28,7 +28,9 @@
       pointer-events: none;
     }
 
-    /* Base clip: every scene is a glass card floating in space */
+    /* Base clip: every scene is a glass card floating in space.
+       NOTE: keep cards visible by default — hyperframes shows/hides clips by
+       data-start/data-duration, and GSAP .from() tweens provide the entrances. */
     .clip {
       position: absolute;
       left: 50%;
@@ -42,34 +44,32 @@
       backdrop-filter: blur(28px) saturate(1.15);
       -webkit-backdrop-filter: blur(28px) saturate(1.15);
       box-shadow: 0 24px 48px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04) inset;
-      transform: translate(-50%, -50%);
+      /* independent `translate` property (not `transform`) so GSAP y/scale
+         transforms compose with centering instead of overwriting it */
+      translate: -50% -50%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
       pointer-events: none;
-      opacity: 0;
-      visibility: hidden;
     }
-
-    .clip.visible { visibility: inherit; }
 
     /* Kicker / badge */
     .kicker {
-      font-size: 15px;
+      font-size: 26px;
       font-weight: 600;
-      letter-spacing: 2.4px;
+      letter-spacing: 4px;
       text-transform: uppercase;
       color: rgba(255,255,255,0.55);
-      margin-bottom: 24px;
+      margin-bottom: 28px;
       text-align: center;
     }
 
     /* Main title */
     .title {
       color: #ffffff;
-      font-size: 56px;
+      font-size: 68px;
       font-weight: 700;
       line-height: 1.12;
       letter-spacing: -0.8px;
@@ -99,14 +99,14 @@
     .stat-value {
       display: block;
       color: #ffffff;
-      font-size: 26px;
+      font-size: 40px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
 
     .stat-label {
       color: rgba(255,255,255,0.45);
-      font-size: 12px;
+      font-size: 20px;
       font-weight: 500;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -156,28 +156,28 @@
     // Scene 1 (0 - 5s): fade up + slight scale
     const tl1 = gsap.timeline({ paused: true });
     tl1.from("#scene-1", {
-      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut, clearProps: "opacity,visibility"
+      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut
     })
     .from("#scene-1 .kicker", { y: 18, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.55")
     .from("#scene-1 .title", { y: 24, opacity: 0, duration: 0.7, ease: "power3.out" }, "-=0.45")
-    .to("#scene-1", { opacity: 0, scale: 0.98, duration: 0.5, ease: "power2.in", clearProps: "opacity,visibility" }, 4.5);
+    .to("#scene-1", { opacity: 0, scale: 0.98, duration: 0.5, ease: "power2.in" }, 4.5);
     window.__timelines["scene-1"] = tl1;
 
     // Scene 2 (5 - 10s): fade up + stats stagger
     const tl2 = gsap.timeline({ paused: true });
     tl2.from("#scene-2", {
-      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut, clearProps: "opacity,visibility"
+      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut
     }, 0)
     .from("#scene-2 .kicker", { y: 18, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.55")
     .from("#scene-2 .title", { y: 24, opacity: 0, duration: 0.7, ease: "power3.out" }, "-=0.45")
     .from("#scene-2 .stat", { y: 20, opacity: 0, duration: 0.55, ease: "power3.out", stagger: 0.12 }, "-=0.35")
-    .to("#scene-2", { opacity: 0, scale: 0.98, duration: 0.5, ease: "power2.in", clearProps: "opacity,visibility" }, 4.5);
+    .to("#scene-2", { opacity: 0, scale: 0.98, duration: 0.5, ease: "power2.in" }, 4.5);
     window.__timelines["scene-2"] = tl2;
 
-    // Scene 3 (10 - 15s): fade up + hold
+    // Scene 3 (10 - 21s): fade up + hold
     const tl3 = gsap.timeline({ paused: true });
     tl3.from("#scene-3", {
-      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut, clearProps: "opacity,visibility"
+      opacity: 0, y: 40, scale: 0.96, duration: 0.9, ease: easeInOut
     }, 0)
     .from("#scene-3 .kicker", { y: 18, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.55")
     .from("#scene-3 .title", { y: 24, opacity: 0, duration: 0.7, ease: "power3.out" }, "-=0.45");
