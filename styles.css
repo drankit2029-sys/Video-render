@@ -413,10 +413,6 @@ body {
   gap: 10px;
 }
 
-.apple-glyph {
-  font-size: 52px;
-}
-
 .label-sub {
   font-weight: 400;
   color: rgba(29, 29, 31, 0.45);
