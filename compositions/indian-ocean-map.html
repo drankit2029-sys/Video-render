@@ -94,11 +94,11 @@
     /* 14% Counter (Positioned below tilted 3D world map at 11.2s - 15.0s) */
     #hud-14-percent {
       position: absolute;
-      bottom: 360px;
+      bottom: 300px;
       left: 0;
       width: 100%;
       text-align: center;
-      font-size: 138px;
+      font-size: 120px;
       font-weight: 900;
       color: #ffea00;
       text-shadow: 0 0 30px rgba(255, 215, 0, 0.95), 0 12px 28px rgba(0, 0, 0, 0.95);
@@ -254,8 +254,8 @@
 
         <!-- LAYER 9: Scene 5 — Asia 1.5x Neon Gold Choropleth (20.0s - 24.2s) -->
         <g id="asia-highlight-group" opacity="0" filter="url(#gold-glow)"></g>
-        <g id="label-asia-15x" opacity="0" transform="translate(1820, 395)">
-          <text id="asia-counter" class="neon-gold-text" font-size="64" text-anchor="middle">0.00x</text>
+        <g id="label-asia-15x" opacity="0" transform="translate(1830, 905)">
+          <text id="asia-counter" class="neon-gold-text" font-size="58" text-anchor="middle">0.00x</text>
         </g>
 
         <!-- LAYER 10: Scene 6 — Double Moon Comparison inside Indian Ocean (24.2s - 28.0s) -->
@@ -410,9 +410,9 @@
         if (asianIsoCodes.has(id)) {
           const p = document.createElementNS(NS, "path");
           p.setAttribute("d", geoPath(feat));
-          p.setAttribute("fill", "rgba(255, 215, 0, 0.42)");
+          p.setAttribute("fill", "rgba(255, 196, 0, 0.22)");
           p.setAttribute("stroke", "#ffea00");
-          p.setAttribute("stroke-width", "2.2");
+          p.setAttribute("stroke-width", "1.6");
           asiaGroup.appendChild(p);
         }
       });
@@ -425,11 +425,13 @@
       const usProjection = d3.geoAlbers().scale(195).translate([0, 0]);
       const usPathStr = d3.geoPath().projection(usProjection)(lower48Feature);
 
-      // 7 Non-Overlapping Positions Inside the Indian Ocean Basin (Lon/Lat converted to SVG coords)
+      // 7 Non-Overlapping Positions Inside the Indian Ocean Basin (Lon/Lat converted to SVG coords).
+      // Kept inside a tight lon/lat window so all 7 stamps stay well within the
+      // portrait viewport at the Beat 4 camera scale (no edge clipping).
       const usLonLatStamps = [
-        [64, 12],  [88, 12],
-        [58, -6],  [82, -6],
-        [52, -24], [76, -24], [100, -24]
+        [66, 6],   [86, 6],
+        [66, -8],  [86, -8],
+        [66, -22], [86, -22], [76, -33]
       ];
       const usCutoutsGroup = document.getElementById("us-cutouts-group");
       const usNodes = [];
@@ -470,11 +472,12 @@
         ease: "power3.inOut"
       }, 0.1);
 
-      // Pop in 3D Arched "INDIAN OCEAN" Title in screen center
+      // Pop in 3D Arched "INDIAN OCEAN" Title in screen center (brought in early so
+      // the opening whip-pan has a subject instead of empty ocean)
       tl.fromTo("#hud-title-group",
         { opacity: 0, scale: 0.45, y: 40 },
         { opacity: 1, scale: 1, y: 0, duration: 0.65, ease: "back.out(1.7)" },
-        1.75
+        1.15
       );
       tl.to("#hud-title-group", { opacity: 0, scale: 1.12, duration: 0.35, ease: "power2.in" }, 4.6);
 
@@ -521,8 +524,8 @@
       tl.to("#card-frame-border", { opacity: 1, duration: 0.3 }, 11.1);
       tl.to("#camera-stage", {
         x: 0,
-        y: -75,
-        scale: 0.41,
+        y: -260,
+        scale: 0.30,
         rotationZ: -11,
         rotationX: 18,
         duration: 0.85,
@@ -541,7 +544,9 @@
       tl.to("#hud-14-percent", { opacity: 0, duration: 0.25 }, 14.8);
 
       // BEAT 4 (15.1s - 20.0s): Zoom Back to Indian Ocean + Stamp 7x Contiguous US Cutouts
-      const camUSView = cameraTo(76, -10, 2.55);
+      // Centred on the stamp cluster (lon 76, lat -12) and zoomed out so all
+      // seven silhouettes plus surrounding basin stay inside the portrait frame.
+      const camUSView = cameraTo(76, -12, 2.05);
       addWhipBlur(14.95, 0.75, 20, 16);
       tl.to("#card-frame-border, #basin-stroke", { opacity: 0, duration: 0.25 }, 14.95);
       tl.to("#camera-stage", {
@@ -557,8 +562,8 @@
       // Stamp all 7 Contiguous US silhouettes cleanly inside the Indian Ocean
       usNodes.forEach((n, idx) => {
         tl.fromTo(n.el,
-          { attr: { transform: `translate(${n.x}, ${n.y - 35}) scale(0)` } },
-          { attr: { transform: `translate(${n.x}, ${n.y}) scale(0.95)` }, duration: 0.34, ease: "back.out(1.7)" },
+          { attr: { transform: `translate(${n.x}, ${n.y - 30}) scale(0)` } },
+          { attr: { transform: `translate(${n.x}, ${n.y}) scale(0.72)` }, duration: 0.34, ease: "back.out(1.7)" },
           15.7 + idx * 0.32
         );
       });
@@ -590,22 +595,26 @@
 
       // BEAT 6 (24.2s - 28.0s): Pan Back to Indian Ocean + Pop In 2 Vector Moons
       addWhipBlur(24.05, 0.7, 14, 24);
+      // Keep the basin outline fully inside frame so the closing shot reads as a
+      // complete shape rather than clipped yellow lines at the edges.
+      const camMoons = cameraTo(76, -16, 1.85);
       tl.to("#basin-stroke", { opacity: 1, duration: 0.3 }, 24.3);
+      tl.to("#basin-underlay", { opacity: 1, duration: 0.3 }, 24.3);
       tl.to("#camera-stage", {
-        x: camBasinFull.x,
-        y: camBasinFull.y,
-        scale: camBasinFull.scale,
+        x: camMoons.x,
+        y: camMoons.y,
+        scale: camMoons.scale,
         duration: 0.75,
         ease: "power3.inOut"
       }, 24.05);
 
       tl.to("#moon-left", {
-        attr: { transform: "translate(-72, 0) scale(1)" },
+        attr: { transform: "translate(-82, 0) scale(1.35)" },
         duration: 0.55,
         ease: "back.out(1.8)"
       }, 24.95);
       tl.to("#moon-right", {
-        attr: { transform: "translate(72, 0) scale(1)" },
+        attr: { transform: "translate(82, 0) scale(1.35)" },
         duration: 0.55,
         ease: "back.out(1.8)"
       }, 25.35);
