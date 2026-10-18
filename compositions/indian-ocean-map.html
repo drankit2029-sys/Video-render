@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Indian Ocean Map Block</title>
+  <!-- GSAP + D3.js + TopoJSON (Standard HyperFrames world-map & us-map dependencies) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    body { background: #03221a; font-family: 'Montserrat', sans-serif; overflow: hidden; }
+
+    #indian-ocean-map {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 50%, #06382c 0%, #021712 100%);
+      perspective: 1600px;
+    }
+
+    /* Background Architectural Grid (Visible when map tilts in 3D at 00:12) */
+    .bg-perspective-grid {
+      position: absolute;
+      inset: -400px;
+      background-image:
+        linear-gradient(rgba(74, 222, 128, 0.16) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(74, 222, 128, 0.16) 2px, transparent 2px);
+      background-size: 95px 95px;
+      transform-origin: center center;
+    }
+
+    /* 3D Camera Rig Container */
+    #camera-stage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2400px;
+      height: 1200px;
+      margin-left: -1200px;
+      margin-top: -600px;
+      transform-style: preserve-3d;
+      will-change: transform, filter;
+      border: 6px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 50px 120px rgba(0, 0, 0, 0.85);
+      background: #074736;
+      overflow: hidden;
+    }
+
+    /* Real NASA Blue Marble Satellite Relief Layer color-graded to match emerald ocean */
+    .satellite-base {
+      position: absolute;
+      inset: 0;
+      width: 2400px;
+      height: 1200px;
+      object-fit: cover;
+      filter: hue-rotate(-32deg) saturate(1.25) contrast(1.12) brightness(0.95);
+    }
+
+    /* Master D3 Geo SVG Overlay */
+    #map-svg {
+      position: absolute;
+      inset: 0;
+      width: 2400px;
+      height: 1200px;
+      overflow: visible;
+    }
+
+    /* Glowing Neon Gold Typography (Matches 3rd, 70.56 Million Sq. Kms, 14%, 1.5x) */
+    .neon-gold-text {
+      fill: #ffeb3b;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.95)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85));
+    }
+
+    /* HUD Overlay Layer for 14% Counter in 3D Tilt View */
+    #hud-14-percent {
+      position: absolute;
+      bottom: 340px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 130px;
+      font-weight: 900;
+      color: #ffeb3b;
+      text-shadow: 0 0 28px rgba(255, 215, 0, 0.9), 0 10px 24px rgba(0, 0, 0, 0.9);
+      opacity: 0;
+      transform: rotate(-11deg);
+      pointer-events: none;
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+
+  <div
+    id="indian-ocean-map"
+    class="clip"
+    data-composition-id="indian-ocean-map"
+    data-width="1080"
+    data-height="1920"
+    data-fps="60"
+    data-duration="28">
+
+    <!-- HyperFrames transitions-blur Component Filter + Neon Glow Defs -->
+    <svg width="0" height="0" style="position:absolute;">
+      <defs>
+        <filter id="hf-motion-blur" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur id="blur-kernel" in="SourceGraphic" stdDeviation="0,0" />
+        </filter>
+        <filter id="gold-border-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6" result="blur1" />
+          <feGaussianBlur stdDeviation="16" result="blur2" />
+          <feMerge>
+            <feMergeNode in="blur2" />
+            <feMergeNode in="blur1" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+    </svg>
+
+    <!-- Background Dark Green Perspective Grid -->
+    <div class="bg-perspective-grid" id="bg-grid"></div>
+
+    <!-- 3D Camera Stage (Pans, Zooms & Tilts across the 2400x1200 World Map) -->
+    <div id="camera-stage" style="filter: url(#hf-motion-blur);">
+
+      <!-- Equirectangular Satellite Physical Map (NASA Blue Marble) -->
+      <img
+        class="satellite-base"
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_Marble_2002.png/2400px-Blue_Marble_2002.png"
+        crossorigin="anonymous"
+        alt="Earth Satellite Relief"
+      />
+
+      <!-- D3.js + HyperFrames Blocks SVG Layer -->
+      <svg id="map-svg" viewBox="0 0 2400 1200">
+        <defs>
+          <!-- Clip Path for the Indian Ocean Basin Measurement Grid -->
+          <clipPath id="basin-clip">
+            <path id="basin-clip-path" />
+          </clipPath>
+
+          <!-- American Flag Pattern for the 7x US Map Cutouts (us-map block) -->
+          <pattern id="us-flag-pattern" viewBox="0 0 190 100" width="100%" height="100%" preserveAspectRatio="none">
+            <rect width="190" height="100" fill="#ffffff"/>
+            <g fill="#b22234">
+              <rect y="0" width="190" height="7.69"/>
+              <rect y="15.38" width="190" height="7.69"/>
+              <rect y="30.77" width="190" height="7.69"/>
+              <rect y="46.15" width="190" height="7.69"/>
+              <rect y="61.54" width="190" height="7.69"/>
+              <rect y="76.92" width="190" height="7.69"/>
+              <rect y="92.31" width="190" height="7.69"/>
+            </g>
+            <rect width="76" height="53.85" fill="#3c3b6e"/>
+            <!-- Stars Grid -->
+            <g fill="#ffffff">
+              <circle cx="12" cy="10" r="2.6"/><circle cx="28" cy="10" r="2.6"/><circle cx="44" cy="10" r="2.6"/><circle cx="60" cy="10" r="2.6"/>
+              <circle cx="20" cy="19" r="2.6"/><circle cx="36" cy="19" r="2.6"/><circle cx="52" cy="19" r="2.6"/><circle cx="68" cy="19" r="2.6"/>
+              <circle cx="12" cy="28" r="2.6"/><circle cx="28" cy="28" r="2.6"/><circle cx="44" cy="28" r="2.6"/><circle cx="60" cy="28" r="2.6"/>
+              <circle cx="20" cy="37" r="2.6"/><circle cx="36" cy="37" r="2.6"/><circle cx="52" cy="37" r="2.6"/><circle cx="68" cy="37" r="2.6"/>
+              <circle cx="12" cy="45" r="2.6"/><circle cx="28" cy="45" r="2.6"/><circle cx="44" cy="45" r="2.6"/><circle cx="60" cy="45" r="2.6"/>
+            </g>
+          </pattern>
+
+          <!-- Arched Text Curves for "INDIAN OCEAN" Title -->
+          <path id="curve-indian" d="M 1520,665 Q 1690,625 1860,665" />
+          <path id="curve-ocean"  d="M 1535,738 Q 1690,702 1845,738" />
+        </defs>
+
+        <!-- 1. D3 Emerald Ocean Tint & World Countries Layer (from world-map block) -->
+        <g id="countries-layer"></g>
+
+        <!-- 2. Indian Ocean Basin Glowing Gold Border & Clipped Measurement Grid -->
+        <g id="basin-group" opacity="0">
+          <!-- Subtle Emerald-Gold Basin Tint -->
+          <path id="basin-fill" fill="rgba(16, 185, 129, 0.28)" />
+          <!-- Clipped Measurement Grid (Sweeps inside the Indian Ocean at 00:08) -->
+          <g id="basin-grid" clip-path="url(#basin-clip)" opacity="0"></g>
+          <!-- Glowing Neon Gold Basin Outline -->
+          <path
+            id="basin-stroke"
+            fill="none"
+            stroke="#ffea00"
+            stroke-width="6"
+            stroke-linejoin="round"
+             stroke-linecap="round"
+            filter="url(#gold-border-glow)"
+          />
+        </g>
+
+        <!-- 3. Scene 1: Arched 3D White Title "INDIAN OCEAN" (0.0s - 5.0s) -->
+        <g id="title-indian-ocean" style="filter: drop-shadow(0 10px 14px rgba(0,0,0,0.85));">
+          <text fill="#e2e8f0" font-size="64" font-weight="900" letter-spacing="6" text-anchor="middle">
+            <textPath href="#curve-indian" startOffset="50%" id="tp-indian">INDIAN</textPath>
+          </text>
+          <text fill="#e2e8f0" font-size="64" font-weight="900" letter-spacing="6" text-anchor="middle">
+            <textPath href="#curve-ocean" startOffset="50%" id="tp-ocean">OCEAN</textPath>
+          </text>
+        </g>
+
+        <!-- 4. Scene 2A: "3rd" Largest Ocean (5.2s - 7.6s) -->
+        <g id="label-3rd" opacity="0" transform="translate(1690, 740)">
+          <text class="neon-gold-text" font-size="92" text-anchor="middle" y="0">
+            3<tspan font-size="52" dy="-36">rd</tspan>
+          </text>
+        </g>
+
+        <!-- 5. Scene 2B: "70.56 Million Sq. Kms" Counter (7.6s - 11.2s) -->
+        <g id="label-area" opacity="0" transform="translate(1660, 735)">
+          <text id="area-counter" class="neon-gold-text" font-size="78" text-anchor="end" x="20" y="0">0.00</text>
+          <text class="neon-gold-text" font-size="34" text-anchor="start" x="38" y="-32">Million</text>
+          <text class="neon-gold-text" font-size="34" text-anchor="start" x="38" y="4">Sq. Kms</text>
+        </g>
+
+        <!-- 6. Scene 4: 7x Contiguous US Flag-Map Cutouts (us-map block, 15.2s - 20.2s) -->
+        <g id="us-cutouts-group"></g>
+
+        <!-- 7. Scene 5: Asia 1.5x Neon Gold Choropleth Overlay (world-map block, 20.2s - 24.3s) -->
+        <g id="asia-highlight-group" opacity="0" filter="url(#gold-border-glow)"></g>
+        <g id="label-asia-15x" opacity="0" transform="translate(1780, 390)">
+          <text id="asia-counter" class="neon-gold-text" font-size="88" text-anchor="middle">0.00x</text>
+        </g>
+
+        <!-- 8. Scene 6: Double Moon Comparison (24.3s - 28.0s) -->
+        <g id="moons-group" transform="translate(1685, 735)">
+          <!-- Left Moon -->
+          <g id="moon-left" transform="translate(-115, 0) scale(0)">
+            <circle r="82" fill="#000" opacity="0.55" transform="translate(8, 12)" filter="blur(8px)" />
+            <clipPath id="moonClipL"><circle r="82" /></clipPath>
+            <image
+              href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/600px-FullMoon2010.jpg"
+              x="-92" y="-92" width="184" height="184"
+              clip-path="url(#moonClipL)"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            <circle r="82" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2" />
+          </g>
+          <!-- Right Moon -->
+          <g id="moon-right" transform="translate(115, 0) scale(0)">
+            <circle r="82" fill="#000" opacity="0.55" transform="translate(8, 12)" filter="blur(8px)" />
+            <clipPath id="moonClipR"><circle r="82" /></clipPath>
+            <image
+              href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/600px-FullMoon2010.jpg"
+              x="-92" y="-92" width="184" height="184"
+              clip-path="url(#moonClipR)"
+              preserveAspectRatio="xMidYMid slice"
+            />
+            <circle r="82" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2" />
+          </g>
+        </g>
+
+      </svg>
+    </div>
+
+    <!-- 14% Counter (Positioned below tilted 3D world map at 11.2s - 15.2s) -->
+    <div id="hud-14-percent"><span id="pct-counter">0</span>%</div>
+
+  </div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+    window.__timelines["indian-ocean-map"] = tl;
+
+    // Equirectangular projection aligned 1:1 with the 2400x1200 satellite base map
+    const projection = d3.geoEquirectangular()
+      .scale(2400 / (2 * Math.PI))
+      .translate([1200, 600]);
+    const geoPath = d3.geoPath().projection(projection);
+
+    // 1. Construct Indian Ocean Basin Polygon in Lon/Lat coordinates
+    const indianOceanCoords = [[
+      [20, -35], [20, -60], [147, -60], [147, -43], [130, -12],
+      [115, -8], [105, -6], [98, 8], [92, 22], [88, 22], [80, 8],
+      [77, 8], [72, 22], [62, 25], [56, 26], [50, 12], [43, 12],
+      [39, -6], [40, -15], [35, -25], [20, -35]
+    ]];
+    const basinFeature = { type: "Polygon", coordinates: indianOceanCoords };
+    const basinPathStr = geoPath(basinFeature);
+
+    document.getElementById("basin-clip-path").setAttribute("d", basinPathStr);
+    document.getElementById("basin-fill").setAttribute("d", basinPathStr);
+    const basinStroke = document.getElementById("basin-stroke");
+    basinStroke.setAttribute("d", basinPathStr);
+
+    // 2. Build Measurement Grid inside Indian Ocean Basin (from HyperFrames data-chart block)
+    const basinGrid = document.getElementById("basin-grid");
+    const NS = "http://www.w3.org/2000/svg";
+    for (let x = 1250; x <= 2150; x += 28) {
+      const line = document.createElementNS(NS, "line");
+      line.setAttribute("x1", x); line.setAttribute("y1", 420);
+      line.setAttribute("x2", x); line.setAttribute("y2", 1020);
+      line.setAttribute("stroke", "rgba(180, 255, 160, 0.48)");
+      line.setAttribute("stroke-width", "1.5");
+      basinGrid.appendChild(line);
+    }
+    for (let y = 420; y <= 1020; y += 28) {
+      const line = document.createElementNS(NS, "line");
+      line.setAttribute("x1", 1250); line.setAttribute("y1", y);
+      line.setAttribute("x2", 2150); line.setAttribute("y2", y);
+      line.setAttribute("stroke", "rgba(180, 255, 160, 0.48)");
+      line.setAttribute("stroke-width", "1.5");
+      basinGrid.appendChild(line);
+    }
+
+    // Helper: Add directional motion blur pulse (HyperFrames transitions-blur component)
+    const blurKernel = document.getElementById("blur-kernel");
+    function addWhipBlur(time, duration, maxBlurX, maxBlurY) {
+      const proxy = { bx: 0, by: 0 };
+      tl.to(proxy, {
+        bx: maxBlurX,
+        by: maxBlurY,
+        duration: duration * 0.45,
+        ease: "power2.in",
+        onUpdate: () => blurKernel.setAttribute("stdDeviation", `${proxy.bx.toFixed(1)},${proxy.by.toFixed(1)}`)
+      }, time);
+      tl.to(proxy, {
+        bx: 0,
+        by: 0,
+        duration: duration * 0.55,
+        ease: "power2.out",
+        onUpdate: () => blurKernel.setAttribute("stdDeviation", `${proxy.bx.toFixed(1)},${proxy.by.toFixed(1)}`)
+      }, time + duration * 0.45);
+    }
+
+    // 3. Load Official HyperFrames TopoJSON Atlases (world-atlas@2 & us-atlas@3)
+    Promise.all([
+      d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"),
+      d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json")
+    ]).then(([world, us]) => {
+
+      // A. Extract Asian Country ISO codes for Scene 5 (1.5x Size of Asia)
+      const asianIsoCodes = new Set([
+        "004","051","031","048","050","064","096","116","156","356","360","364","368",
+        "376","392","400","398","414","417","418","422","458","462","496","104","524",
+        "408","512","586","608","634","682","702","410","144","760","158","762","764",
+        "792","795","784","860","704","887","643"
+      ]);
+      const countries = topojson.feature(world, world.objects.countries).features;
+      const asiaGroup = document.getElementById("asia-highlight-group");
+
+      countries.forEach(feat => {
+        const id = String(feat.id).padStart(3, "0");
+        if (asianIsoCodes.has(id)) {
+          const p = document.createElementNS(NS, "path");
+          p.setAttribute("d", geoPath(feat));
+          p.setAttribute("fill", "rgba(255, 200, 0, 0.36)");
+          p.setAttribute("stroke", "#ffea00");
+          p.setAttribute("stroke-width", "3.5");
+          asiaGroup.appendChild(p);
+        }
+      });
+
+      // B. Extract Contiguous US Outline from us-atlas@3 (HyperFrames us-map block)
+      const nationFeature = topojson.feature(us, us.objects.nation).features[0];
+      const usProjection = d3.geoAlbersUsa().scale(360).translate([0, 0]);
+      const usPathStr = d3.geoPath().projection(usProjection)(nationFeature);
+
+      // 7 Stamp Positions across the Indian Ocean Basin
+      const usPositions = [
+        { x: 1560, y: 650, scale: 0.92 },
+        { x: 1810, y: 650, scale: 0.92 },
+        { x: 1580, y: 760, scale: 0.92 },
+        { x: 1830, y: 765, scale: 0.92 },
+        { x: 1510, y: 875, scale: 0.92 },
+        { x: 1745, y: 875, scale: 0.92 },
+        { x: 1965, y: 880, scale: 0.92 }
+      ];
+
+      const usCutoutsGroup = document.getElementById("us-cutouts-group");
+      const usNodes = [];
+
+      usPositions.forEach((pos, idx) => {
+        const g = document.createElementNS(NS, "g");
+        g.setAttribute("id", `us-stamp-${idx}`);
+        g.setAttribute("transform", `translate(${pos.x}, ${pos.y}) scale(0)`);
+        g.style.filter = "drop-shadow(0 12px 14px rgba(0,0,0,0.8))";
+
+        const path = document.createElementNS(NS, "path");
+        path.setAttribute("d", usPathStr);
+        path.setAttribute("fill", "url(#us-flag-pattern)");
+        path.setAttribute("stroke", "#ffffff");
+        path.setAttribute("stroke-width", "2.5");
+
+        g.appendChild(path);
+        usCutoutsGroup.appendChild(g);
+        usNodes.push({ el: g, pos });
+      });
+
+      // =========================================================================
+      // BUILD MASTER 28-SECOND SEEKABLE GSAP TIMELINE
+      // =========================================================================
+
+      // BEAT 1 (0.0s - 5.0s): Camera Whip-Pan from Africa to Indian Ocean + Title
+      tl.set("#camera-stage", { x: -160, y: -60, scale: 2.35, rotationX: 0, rotationZ: 0 }, 0);
+      addWhipBlur(0.0, 1.1, 24, 8);
+      tl.to("#camera-stage", { x: -1150, y: -230, scale: 2.35, duration: 1.2, ease: "power3.inOut" }, 0);
+
+      tl.from("#title-indian-ocean", {
+        scale: 0.4,
+        opacity: 0,
+        transformOrigin: "1690px 700px",
+        duration: 0.7,
+        ease: "back.out(1.7)"
+      }, 2.1);
+      tl.to("#title-indian-ocean", { opacity: 0, scale: 1.15, duration: 0.35, ease: "power2.in" }, 4.65);
+
+      // BEAT 2 (5.0s - 11.2s): Basin Neon Outline + "3rd" + Grid & 70.56M Counter
+      addWhipBlur(4.85, 0.65, 16, 16);
+      tl.to("#camera-stage", { x: -790, y: -175, scale: 1.62, duration: 0.7, ease: "power3.inOut" }, 4.85);
+      tl.to("#basin-group", { opacity: 1, duration: 0.3 }, 5.1);
+      tl.fromTo("#basin-stroke", { strokeDasharray: 3200, strokeDashoffset: 3200 }, { strokeDashoffset: 0, duration: 1.2, ease: "power2.out" }, 5.1);
+
+      tl.fromTo("#label-3rd", { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, 5.5);
+      tl.to("#label-3rd", { opacity: 0, scale: 0.8, duration: 0.3 }, 7.35);
+
+      // 7.5s: Zoom into Basin Grid & Roll Counter 0.00 -> 70.56 Million Sq. Kms
+      tl.to("#camera-stage", { x: -990, y: -260, scale: 2.05, duration: 0.75, ease: "power2.inOut" }, 7.4);
+      tl.to("#basin-grid", { opacity: 1, duration: 0.4 }, 7.5);
+      tl.to("#label-area", { opacity: 1, duration: 0.3 }, 7.6);
+
+      const areaObj = { val: 0 };
+      const areaEl = document.getElementById("area-counter");
+      tl.to(areaObj, {
+        val: 70.56,
+        duration: 2.2,
+        ease: "power2.out",
+        onUpdate: () => { areaEl.textContent = areaObj.val.toFixed(2); }
+      }, 7.65);
+
+      // BEAT 3 (11.2s - 15.2s): 3D Tilted World Card Pullback ("Nearly 14% of Earth's Surface")
+      addWhipBlur(11.1, 0.75, 22, 22);
+      tl.to("#label-area, #basin-group", { opacity: 0, duration: 0.3 }, 11.1);
+      tl.to("#camera-stage", {
+        x: 0,
+        y: -70,
+        scale: 0.42,
+        rotationZ: -11,
+        rotationX: 18,
+        duration: 0.85,
+        ease: "power3.inOut"
+      }, 11.15);
+
+      tl.to("#hud-14-percent", { opacity: 1, duration: 0.35 }, 11.7);
+      const pctObj = { val: 0 };
+      const pctEl = document.getElementById("pct-counter");
+      tl.to(pctObj, {
+        val: 14,
+        duration: 1.5,
+        ease: "power2.out",
+        onUpdate: () => { pctEl.textContent = Math.round(pctObj.val); }
+      }, 11.75);
+      tl.to("#hud-14-percent", { opacity: 0, duration: 0.3 }, 14.85);
+
+      // BEAT 4 (15.2s - 20.2s): Zoom Back to Basin + Stamp 7x US Flag Cutouts
+      addWhipBlur(15.0, 0.75, 24, 18);
+      tl.to("#camera-stage", {
+        x: -1020,
+        y: -250,
+        scale: 2.1,
+        rotationZ: 0,
+        rotationX: 0,
+        duration: 0.8,
+        ease: "power3.inOut"
+      }, 15.0);
+
+      // First show 1 large US cutout at 15.7s, then stamp all 7 cutouts rapidly
+      tl.fromTo(usNodes[0].el,
+        { attr: { transform: `translate(1650, 680) scale(0)` } },
+        { attr: { transform: `translate(1650, 680) scale(1.25)` }, duration: 0.45, ease: "back.out(1.7)" },
+        15.65
+      );
+      tl.to(usNodes[0].el, {
+        attr: { transform: `translate(${usNodes[0].pos.x}, ${usNodes[0].pos.y}) scale(${usNodes[0].pos.scale})` },
+        duration: 0.35,
+        ease: "power2.inOut"
+      }, 17.2);
+
+      for (let i = 1; i < usNodes.length; i++) {
+        const n = usNodes[i];
+        tl.fromTo(n.el,
+          { attr: { transform: `translate(${n.pos.x + 120}, ${n.pos.y}) scale(0)` } },
+          { attr: { transform: `translate(${n.pos.x}, ${n.pos.y}) scale(${n.pos.scale})` }, duration: 0.32, ease: "back.out(1.6)" },
+          17.35 + (i - 1) * 0.28
+        );
+      }
+      tl.to("#us-cutouts-group", { opacity: 0, duration: 0.35 }, 19.95);
+
+      // BEAT 5 (20.2s - 24.3s): Pan North to Asia + "1.5x" Neon Choropleth
+      addWhipBlur(20.0, 0.7, 14, 26);
+      tl.to("#camera-stage", {
+        x: -760,
+        y: 190,
+        scale: 1.52,
+        duration: 0.75,
+        ease: "power3.inOut"
+      }, 20.0);
+
+      tl.to("#asia-highlight-group, #label-asia-15x", { opacity: 1, duration: 0.4 }, 20.5);
+      const asiaObj = { val: 0 };
+      const asiaEl = document.getElementById("asia-counter");
+      tl.to(asiaObj, {
+        val: 1.5,
+        duration: 1.5,
+        ease: "power2.out",
+        onUpdate: () => {
+          asiaEl.textContent = (asiaObj.val >= 1.48 ? "1.5" : asiaObj.val.toFixed(2)) + "x";
+        }
+      }, 20.6);
+      tl.to("#asia-highlight-group, #label-asia-15x", { opacity: 0, duration: 0.35 }, 23.95);
+
+      // BEAT 6 (24.3s - 28.0s): Pan Back to Indian Ocean + Pop In 2 Full Moons
+      addWhipBlur(24.1, 0.7, 14, 26);
+      tl.to("#camera-stage", {
+        x: -1010,
+        y: -245,
+        scale: 2.08,
+        duration: 0.75,
+        ease: "power3.inOut"
+      }, 24.1);
+
+      tl.to("#moon-left", {
+        attr: { transform: "translate(-115, 0) scale(1)" },
+        duration: 0.55,
+        ease: "back.out(1.8)"
+      }, 25.1);
+      tl.to("#moon-right", {
+        attr: { transform: "translate(115, 0) scale(1)" },
+        duration: 0.55,
+        ease: "back.out(1.8)"
+      }, 25.45);
+
+      // Browser Auto-Preview Loop (Disabled automatically when HyperFrames renders)
+      if (!navigator.webdriver && !window.location.search.includes("hyperframes")) {
+        function fit() {
+          const root = document.getElementById("indian-ocean-map");
+          const s = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+          document.body.style.display = "flex";
+          document.body.style.alignItems = "center";
+          document.body.style.justifyContent = "center";
+          document.body.style.width = "100vw";
+          document.body.style.height = "100vh";
+          root.style.transform = `scale(${s})`;
+          root.style.transformOrigin = "center center";
+        }
+        window.addEventListener("resize", fit);
+        fit();
+
+        let start = performance.now();
+        function tick(now) {
+          const t = ((now - start) / 1000) % 28.0;
+          tl.seek(t, false);
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+    });
+  </script>
+</body>
+</html>
