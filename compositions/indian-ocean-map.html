@@ -540,28 +540,23 @@
       }, 25.45);
 
       // Browser Auto-Preview Loop (Disabled automatically when HyperFrames renders)
+      // Kept out of the rendered timeline: hyperframes lint bans performance.now()
+      // and requestAnimationFrame inside compositions because they run on wall-clock
+      // time and would desync frame capture.
       if (!navigator.webdriver && !window.location.search.includes("hyperframes")) {
-        function fit() {
-          const root = document.getElementById("indian-ocean-map");
-          const s = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
-          document.body.style.display = "flex";
-          document.body.style.alignItems = "center";
-          document.body.style.justifyContent = "center";
-          document.body.style.width = "100vw";
-          document.body.style.height = "100vh";
-          root.style.transform = `scale(${s})`;
-          root.style.transformOrigin = "center center";
-        }
-        window.addEventListener("resize", fit);
-        fit();
-
-        let start = performance.now();
-        function tick(now) {
-          const t = ((now - start) / 1000) % 28.0;
-          tl.seek(t, false);
-          requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
+        const root = document.getElementById("indian-ocean-map");
+        const s = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+        document.body.style.display = "flex";
+        document.body.style.alignItems = "center";
+        document.body.style.justifyContent = "center";
+        document.body.style.width = "100vw";
+        document.body.style.height = "100vh";
+        root.style.transform = `scale(${s})`;
+        root.style.transformOrigin = "center center";
+        window.addEventListener("resize", () => {
+          const s2 = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+          root.style.transform = `scale(${s2})`;
+        });
       }
     });
   </script>
