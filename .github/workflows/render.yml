@@ -1,4 +1,4 @@
-name: Render HyperFrames Short
+name: Render Indian Ocean Short
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  render-video:
+  render-short:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,53 +18,47 @@ jobs:
         with:
           node-version: '22'
 
-      - name: 3. Cache pip, Kokoro & Whisper model weights
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pip
-            ~/.cache/huggingface
-          key: tts-stt-deps-${{ runner.os }}-${{ hashFiles('scripts/gen_voice.py') }}
-          restore-keys: |
-            tts-stt-deps-${{ runner.os }}-
-
-      - name: 4. Install System Dependencies (FFmpeg, espeak-ng, browser libs)
+      - name: 3. Install System Dependencies & Edge-TTS
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg espeak-ng libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2t64
+          sudo apt-get install -y ffmpeg curl jq libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2t64
+          pip install edge-tts
 
-      - name: 5. Install Python Kokoro TTS + Whisper STT
+      - name: 4. Pre-Bundle Offline TopoJSON Data (Zero Network Lag on Frame 0)
         run: |
-          pip install kokoro soundfile faster-whisper
+          curl -sL https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json -o world.json
+          curl -sL https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json -o us.json
+          node -e '
+            const fs = require("fs");
+            const world = JSON.parse(fs.readFileSync("world.json", "utf8"));
+            const us = JSON.parse(fs.readFileSync("us.json", "utf8"));
+            fs.writeFileSync("topo-data.js", "window.__TOPO_DATA = " + JSON.stringify({ world, us }) + ";");
+          '
 
-      - name: 6. Generate Voiceover & Word-Level Subtitles (Kokoro + Whisper)
+      - name: 5. Generate 28s Voiceover from script.txt
         run: |
-          python scripts/gen_voice.py
+          edge-tts --voice en-US-ChristopherNeural --rate="+8%" --file script.txt --write-media voiceover.mp3 --write-subtitles captions.vtt
 
-      - name: 7. Install HyperFrames CLI & Headless Browser
+      - name: 6. Install HyperFrames CLI & Built-in Registry Blocks
         env:
           HYPERFRAMES_NO_UPDATE_CHECK: 1
         run: |
           npm install -g hyperframes
           npx hyperframes browser ensure
+          npx hyperframes add vignette grain-overlay transitions-blur --no-clipboard || true
 
-      - name: 8. Lint & Render 60fps YouTube Short MP4
+      - name: 7. Lint & Render 60fps YouTube Short
         env:
           HYPERFRAMES_NO_UPDATE_CHECK: 1
         run: |
           npx hyperframes lint
-          npx hyperframes render --fps 60 --quality high --workers 4 --output final_short_raw.mp4
+          npx hyperframes render --fps 60 --quality high --workers 4 --output final_short.mp4
 
-      - name: 9. Burn Professional Subtitles into Rendered Video
-        run: |
-          ffmpeg -y -i final_short_raw.mp4 -vf "ass=captions.ass" -c:a copy -movflags +faststart final_short.mp4
-
-      - name: 10. Upload Rendered MP4 as Downloadable Artifact
+      - name: 8. Upload Rendered MP4 Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: youtube-short-mp4
+          name: indian-ocean-short
           path: |
             final_short.mp4
-            captions.ass
             captions.vtt
           retention-days: 7
