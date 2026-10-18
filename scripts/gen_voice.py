@@ -98,16 +98,30 @@ with open("captions.ass", "w", encoding="utf-8") as f:
 
 print(f"Generated voiceover.mp3, captions.vtt, captions.ass ({len(cues)} word cues)")
 
-# Keep the composition long enough to hold the whole voiceover.
-D = math.ceil(total + 1.0)
+# The composition's scene beats (including the two-Moon finale at 24.2s-28s)
+# are authored for a fixed 28s. Never shrink below that or the finale gets cut
+# off; only extend when the voiceover outruns the authored length.
+AUTHORED = 28.0
+D = max(AUTHORED, math.ceil(total + 1.0))
+
 with open("index.html", encoding="utf-8") as f:
     html = f.read()
 html = re.sub(
     r'(data-composition-id="indian-ocean-short"[^>]*?data-duration=")[\d.]+(")',
-    rf"\g<1>{D}\g<2>", html, count=1)
+    rf"\g<1>{D:g}\g<2>", html, count=1)
 html = re.sub(
     r'(<audio id="voiceover"[^>]*?data-duration=")[\d.]+(")',
-    rf"\g<1>{D}\g<2>", html, count=1)
+    rf"\g<1>{D:g}\g<2>", html, count=1)
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html)
-print(f"Patched index.html composition duration -> {D}s")
+
+# Keep the mounted sub-composition's own data-duration in sync with the host.
+src = "compositions/indian-ocean-map.html"
+with open(src, encoding="utf-8") as f:
+    comp = f.read()
+comp = re.sub(r'(data-composition-id="indian-ocean-map"[^>]*?data-duration=")[\d.]+(")',
+              rf"\g<1>{D:g}\g<2>", comp, count=1)
+with open(src, "w", encoding="utf-8") as f:
+    f.write(comp)
+
+print(f"Composition duration -> {D:g}s (voiceover {total:.2f}s, authored {AUTHORED:g}s)")

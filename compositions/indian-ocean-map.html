@@ -569,7 +569,7 @@
       });
       tl.to("#us-cutouts-group", { opacity: 0, duration: 0.3 }, 19.8);
 
-      // BEAT 5 (20.0s - 24.2s): Pan North to Asia + "1.5x" Neon Choropleth
+      // BEAT 5 (20.0s - 23.3s): Pan North to Asia + "1.5x" Neon Choropleth
       const camAsia = cameraTo(88, 32, 2.15);
       addWhipBlur(19.9, 0.7, 14, 24);
       tl.to("#camera-stage", {
@@ -591,33 +591,35 @@
           asiaEl.textContent = (asiaObj.val >= 1.48 ? "1.5" : asiaObj.val.toFixed(2)) + "x";
         }
       }, 20.55);
-      tl.to("#asia-highlight-group, #label-asia-15x", { opacity: 0, duration: 0.3 }, 23.95);
+      tl.to("#asia-highlight-group, #label-asia-15x", { opacity: 0, duration: 0.3 }, 23.0);
 
-      // BEAT 6 (24.2s - 28.0s): Pan Back to Indian Ocean + Pop In 2 Vector Moons
-      addWhipBlur(24.05, 0.7, 14, 24);
+      // BEAT 6 (23.3s - 28.0s): Pan Back to Indian Ocean + Pop In 2 Vector Moons
+      // Starts right as the narration says "...double that of the Moon" so the
+      // visual lands ON the line instead of several seconds after it.
+      addWhipBlur(23.35, 0.6, 14, 24);
       // Keep the basin outline fully inside frame so the closing shot reads as a
       // complete shape rather than clipped yellow lines at the edges.
       const camMoons = cameraTo(76, -16, 1.85);
-      tl.to("#basin-stroke", { opacity: 1, duration: 0.3 }, 24.3);
-      tl.to("#basin-underlay", { opacity: 1, duration: 0.3 }, 24.3);
+      tl.to("#basin-stroke", { opacity: 1, duration: 0.3 }, 23.5);
+      tl.to("#basin-underlay", { opacity: 1, duration: 0.3 }, 23.5);
       tl.to("#camera-stage", {
         x: camMoons.x,
         y: camMoons.y,
         scale: camMoons.scale,
-        duration: 0.75,
+        duration: 0.7,
         ease: "power3.inOut"
-      }, 24.05);
+      }, 23.35);
 
       tl.to("#moon-left", {
         attr: { transform: "translate(-82, 0) scale(1.35)" },
         duration: 0.55,
         ease: "back.out(1.8)"
-      }, 24.95);
+      }, 24.0);
       tl.to("#moon-right", {
         attr: { transform: "translate(82, 0) scale(1.35)" },
         duration: 0.55,
         ease: "back.out(1.8)"
-      }, 25.35);
+      }, 24.45);
     }
 
     // Load synchronously from pre-bundled window.__TOPO_DATA (in GitHub Actions) or fallback to CDN
