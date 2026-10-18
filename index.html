@@ -2,320 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Red Bull — Liquid Glass 2030 (Real Assets Edition)</title>
-  <!-- GSAP Core & CustomEase -->
+  <title>Indian Ocean Size Comparison — Host Composition</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
-  <!-- Open-Source Lucide Production Vector Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Inter Display Typography -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #021a14; overflow: hidden; width: 1080px; height: 1920px; }
+
+    /* HyperFrames Built-in Component: compositions/components/vignette.html */
+    .hf-vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse at 50% 50%,
+        transparent 52%,
+        rgba(1, 14, 10, 0.55) 82%,
+        rgba(0, 8, 5, 0.92) 100%
+      );
+      z-index: 10;
+    }
+
+    /* HyperFrames Built-in Component: compositions/components/grain-overlay.html */
+    .hf-grain-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.055;
+      mix-blend-mode: overlay;
+      z-index: 11;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+  </style>
 </head>
 <body>
+  <!-- Root 1080x1920 Vertical YouTube Short Composition (28s @ 60fps) -->
+  <div
+    id="root"
+    data-composition-id="indian-ocean-short"
+    data-width="1080"
+    data-height="1920"
+    data-fps="60"
+    data-duration="28"
+    style="position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #021a14;">
 
-  <!-- Hidden SVG Optical Filters for Liquid Mercury Morphing & Glass Refraction -->
-  <svg width="0" height="0" style="position:absolute;">
-    <defs>
-      <!-- Viscous Liquid Goo Filter for Droplet Splitting -->
-      <filter id="liquid-goo">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="16" result="blur" />
-        <feColorMatrix in="blur" mode="matrix"
-          values="1 0 0 0 0  
-                  0 1 0 0 0  
-                  0 0 1 0 0  
-                  0 0 0 26 -11" result="goo" />
-        <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-      </filter>
+    <!-- Track 0: Synced Edge-TTS Voiceover -->
+    <audio id="voiceover" class="clip" data-start="0" data-duration="28" data-track-index="0" src="voiceover.mp3"></audio>
 
-      <!-- Reusable Official Red Bull Charging Bulls Crest Vector -->
-      <g id="redbull-crest-vector">
-        <!-- Solar Gold Disc -->
-        <circle cx="130" cy="100" r="46" fill="#ffb800" />
-        <!-- Left Charging Bull Multi-Point Silhouette -->
-        <path d="M18 118 C32 95, 58 82, 88 86 L104 74 C110 70, 118 75, 114 82 L108 90 C116 93, 122 98, 124 104 C112 108, 98 106, 86 112 L68 126 L58 124 L66 110 C50 110, 34 116, 18 118 Z" fill="#e10600" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
-        <!-- Right Charging Bull Multi-Point Silhouette -->
-        <path d="M242 118 C228 95, 202 82, 172 86 L156 74 C150 70, 142 75, 146 82 L152 90 C144 93, 138 98, 136 104 C148 108, 162 106, 174 112 L192 126 L202 124 L194 110 C210 110, 226 116, 242 118 Z" fill="#e10600" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
-      </g>
-
-      <!-- Detailed 3D-Shaded Red Bull Can Vector Component -->
-      <g id="redbull-can-vector">
-        <defs>
-          <linearGradient id="aluminumSheen" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#cbd5e1"/>
-            <stop offset="25%" stop-color="#ffffff"/>
-            <stop offset="55%" stop-color="#94a3b8"/>
-            <stop offset="85%" stop-color="#e2e8f0"/>
-            <stop offset="100%" stop-color="#64748b"/>
-          </linearGradient>
-          <linearGradient id="cobaltQuarter" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#1e40af"/>
-            <stop offset="100%" stop-color="#0f172a"/>
-          </linearGradient>
-          <clipPath id="canClip">
-            <rect x="20" y="16" width="120" height="228" rx="22" />
-          </clipPath>
-        </defs>
-        <g clip-path="url(#canClip)">
-          <rect x="20" y="16" width="120" height="228" fill="url(#aluminumSheen)" />
-          <!-- Iconic Blue & Silver Quartered Geometry -->
-          <rect x="20" y="16" width="60" height="114" fill="url(#cobaltQuarter)" />
-          <rect x="80" y="130" width="60" height="114" fill="url(#cobaltQuarter)" />
-          <!-- Center Crest -->
-          <use href="#redbull-crest-vector" transform="translate(15, 78) scale(0.5)" />
-        </g>
-        <!-- Can Rim & Specular Borders -->
-        <rect x="20" y="16" width="120" height="228" rx="22" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3"/>
-        <ellipse cx="80" cy="18" rx="56" ry="7" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
-      </g>
-    </defs>
-  </svg>
-
-  <!-- HYPERFRAMES ROOT COMPOSITION: 1080x1920 | 60fps | 15s -->
-  <div id="root" data-composition-id="apple-liquid-glass" data-width="1080" data-height="1920" data-fps="60" data-duration="15">
-
-    <!-- 3D Architectural Ceramic Tile Studio Environment -->
-    <div id="studio-env" class="studio-light">
-      <div class="wall-tiles"></div>
-      <div class="floor-plane">
-        <div class="floor-tiles"></div>
-        <div class="sunlight-beam"></div>
-      </div>
-      <!-- Full-Frame Prismatic Rainbow Lens Pulse -->
-      <div id="prismatic-pulse"></div>
+    <!-- Track 1: Mounted Sub-Composition Block via data-composition-src -->
+    <div
+      class="clip"
+      data-composition-id="indian-ocean-map"
+      data-composition-src="compositions/indian-ocean-map.html"
+      data-start="0"
+      data-duration="28"
+      data-width="1080"
+      data-height="1920"
+      data-track-index="1">
     </div>
 
-    <!-- Synced Voiceover Audio Track -->
-    <audio id="voiceover" class="clip" data-start="0" data-duration="15" data-track-index="0" src="voiceover.mp3"></audio>
-
-    <!-- =======================================================================
-         SCENE 1 (0.0s - 3.2s):
-         "Why does Red Bull spend billions on extreme sports..."
-         Assets: 3D Fluent Parachute Render, Official F1 Vector Logo, Lucide Icons
-         ======================================================================= -->
-    <div id="scene-1" class="clip" data-start="0" data-duration="3.2" data-track-index="1" data-composition-id="scene-1">
-      <div class="perspective-stage">
-        <div id="s1-dock" class="liquid-dock-3d">
-          <div class="dock-thickness"></div>
-
-          <!-- Squircle 1: Detailed Red Bull Can Vector -->
-          <div class="glass-squircle" id="s1-icon-1">
-            <svg viewBox="0 0 160 260" width="76" height="122" class="asset-drop-shadow">
-              <use href="#redbull-can-vector" />
-            </svg>
-          </div>
-
-          <!-- Squircle 2 (HERO): Real 3D Open-Source Parachute Render (Pops out in Z-space) -->
-          <div class="glass-squircle hero-squircle" id="s1-icon-hero">
-            <div class="chromatic-rim" id="s1-hero-rim"></div>
-            <div class="liquid-swell" id="s1-liquid-swell"></div>
-            <img
-              src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Parachute/3D/parachute_3d.png"
-              alt="3D Parachute"
-              class="real-3d-asset"
-              crossorigin="anonymous"
-            />
-          </div>
-
-          <!-- Squircle 3: Official Formula 1 Vector Brand Logo (Simple Icons CDN) -->
-          <div class="glass-squircle" id="s1-icon-3">
-            <img
-              src="https://cdn.simpleicons.org/f1/e10600"
-              alt="F1 Official Vector"
-              class="brand-vector-logo"
-              crossorigin="anonymous"
-            />
-          </div>
-
-          <!-- Squircle 4: Lucide Production Icon (Tv / Broadcast) -->
-          <div class="glass-squircle" id="s1-icon-4">
-            <i data-lucide="radio-tower" class="lucide-glass-icon"></i>
-          </div>
-        </div>
-      </div>
-
-      <!-- Whisper-Clean Apple Product Title with Official Apple Vector Mark -->
-      <div class="apple-label" id="s1-label">
-        <img src="https://cdn.simpleicons.org/apple/1d1d1f" class="apple-logo-svg" crossorigin="anonymous" alt="Apple" />
-        AdrenalinePro <span class="label-sub">$2.8B Budget</span>
-      </div>
-      <div class="apple-footnote">Extreme sports spectacles are not designed to lower beverage prices.</div>
-    </div>
-
-
-    <!-- =======================================================================
-         SCENE 2 (3.2s - 6.0s):
-         "...instead of making their drink cheaper?"
-         Assets: Vertical Liquid Glass Pill Switch + Detailed Can & Lucide Lock
-         ======================================================================= -->
-    <div id="scene-2" class="clip" data-start="3.2" data-duration="2.8" data-track-index="1" data-composition-id="scene-2">
-      <div class="perspective-stage">
-        <div id="s2-pill-switch" class="liquid-pill-vertical">
-          <div id="s2-track-glow" class="pill-internal-fill"></div>
-          <div class="chromatic-rim" id="s2-rim"></div>
-
-          <div class="pill-price-mark top-mark">$3.59</div>
-          <div class="pill-slide-hint" id="s2-hint">
-            <i data-lucide="chevrons-down" class="lucide-hint-icon"></i>
-            slide to discount
-          </div>
-          <div class="pill-price-mark bottom-mark">
-            <i data-lucide="lock" class="lucide-inline-lock"></i> $0.99
-          </div>
-
-          <!-- Tactile Floating Glass Knob housing the 3D Can Vector -->
-          <div id="s2-knob" class="liquid-knob">
-            <svg viewBox="0 0 160 260" width="84" height="136" class="asset-drop-shadow">
-              <use href="#redbull-can-vector" />
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <div class="apple-label" id="s2-label">
-        <img src="https://cdn.simpleicons.org/apple/1d1d1f" class="apple-logo-svg" crossorigin="anonymous" alt="Apple" />
-        PriceLock
-      </div>
-      <div class="apple-footnote">Price reductions are hardware-locked to protect premium perception.</div>
-    </div>
-
-
-    <!-- =======================================================================
-         SCENE 3 (6.0s - 8.8s):
-         "Because Red Bull isn't a beverage company. They outsource manufacturing..."
-         Assets: Glass Vessel + 3D Fluent Factory & Gear Renders splitting via Goo Filter
-         ======================================================================= -->
-    <div id="scene-3" class="clip" data-start="6.0" data-duration="2.8" data-track-index="1" data-composition-id="scene-3">
-      <div class="perspective-stage" style="filter: url(#liquid-goo);">
-        <!-- Main Glass Vessel housing the Can -->
-        <div id="s3-vessel" class="liquid-vessel">
-          <svg viewBox="0 0 160 260" width="145" height="235" class="asset-drop-shadow" style="margin-bottom: 36px;">
-            <use href="#redbull-can-vector" />
-          </svg>
-          <div class="vessel-tag">$0.09</div>
-        </div>
-
-        <!-- Detaching Liquid Droplet containing Real 3D Factory Render -->
-        <div id="s3-droplet" class="liquid-droplet">
-          <img
-            src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Factory/3D/factory_3d.png"
-            alt="3D Factory"
-            class="real-3d-asset-small"
-            crossorigin="anonymous"
-          />
-        </div>
-      </div>
-
-      <div class="apple-label" id="s3-label">
-        <img src="https://cdn.simpleicons.org/apple/1d1d1f" class="apple-logo-svg" crossorigin="anonymous" alt="Apple" />
-        CoPacker Air <span class="label-sub">Outsourced</span>
-      </div>
-      <div class="apple-footnote">Aluminum shell and liquid manufactured entirely by third parties.</div>
-    </div>
-
-
-    <!-- =======================================================================
-         SCENE 4 (8.8s - 11.8s):
-         "...charge a massive premium, and funnel thirty percent of revenue into adrenaline marketing."
-         Assets: Dark-Mode Grid Room + 3D Trophy, 3D High-Voltage Bolt, F1 Logo
-         ======================================================================= -->
-    <div id="scene-4" class="clip" data-start="8.8" data-duration="3.0" data-track-index="1" data-composition-id="scene-4">
-      <div class="perspective-stage">
-        <!-- Central Prismatic Glass Ring -->
-        <div id="s4-ring-card" class="liquid-dark-orb">
-          <div class="chromatic-rim dark-rim-glow" id="s4-chromatic"></div>
-          <svg viewBox="0 0 260 260" width="280" height="280" style="transform: rotate(-90deg);">
-            <circle cx="130" cy="130" r="102" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="18"/>
-            <circle id="s4-arc" cx="130" cy="130" r="102" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-dasharray="640" stroke-dashoffset="640"/>
-          </svg>
-          <div class="orb-center-metric">30%</div>
-        </div>
-
-        <!-- 3 Orbiting Glass Squircles with Real 3D & Brand Assets -->
-        <div class="orbit-row">
-          <div class="glass-squircle dark-squircle" id="s4-node-1">
-            <img
-              src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Trophy/3D/trophy_3d.png"
-              alt="3D Trophy"
-              class="real-3d-asset-small"
-              crossorigin="anonymous"
-            />
-          </div>
-          <div class="glass-squircle dark-squircle" id="s4-node-2">
-            <img
-              src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/High%20voltage/3D/high_voltage_3d.png"
-              alt="3D High Voltage"
-              class="real-3d-asset-small"
-              crossorigin="anonymous"
-            />
-          </div>
-          <div class="glass-squircle dark-squircle" id="s4-node-3">
-            <img
-              src="https://cdn.simpleicons.org/f1/ffffff"
-              alt="F1 White Vector"
-              class="brand-vector-logo"
-              crossorigin="anonymous"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="apple-label light-text" id="s4-label">
-        <img src="https://cdn.simpleicons.org/apple/ffffff" class="apple-logo-svg" crossorigin="anonymous" alt="Apple" />
-        Flywheel OS
-      </div>
-      <div class="apple-footnote light-footnote">40× retail markup automatically routes 30% of revenue into global stunts.</div>
-    </div>
-
-
-    <!-- =======================================================================
-         SCENE 5 (11.8s - 15.0s):
-         "You aren't buying caffeine; you're buying the brand."
-         Assets: Lucide Atom + 3D Lab Flask flips into Sculpted Red Bull Crest Monolith
-         ======================================================================= -->
-    <div id="scene-5" class="clip" data-start="11.8" data-duration="3.2" data-track-index="1" data-composition-id="scene-5">
-      <div class="perspective-stage">
-
-        <!-- State A: Chemical Commodity Tile (Lucide Atom + 3D Petri/Chemistry Asset) -->
-        <div id="s5-caffeine-tile" class="liquid-monolith">
-          <div style="display:flex; flex-direction:column; align-items:center; gap:18px;">
-            <i data-lucide="atom" class="lucide-hero-atom"></i>
-            <span style="font-size:28px; font-weight:600; letter-spacing:2px; color:rgba(29,29,31,0.55);">C₈H₁₀N₄O₂</span>
-          </div>
-        </div>
-
-        <!-- State B: Sculpted Liquid Glass Red Bull Brand Crest Monolith -->
-        <div id="s5-brand-monolith" class="liquid-monolith hero-monolith">
-          <div class="chromatic-rim" id="s5-monolith-rim"></div>
-          <svg viewBox="0 0 260 200" width="380" height="290" class="asset-drop-shadow">
-            <use href="#redbull-crest-vector" />
-          </svg>
-        </div>
-
-      </div>
-
-      <div class="apple-label" id="s5-label">
-        <img src="https://cdn.simpleicons.org/apple/1d1d1f" class="apple-logo-svg" crossorigin="anonymous" alt="Apple" />
-        <span id="s5-label-text">Caffeine</span>
-      </div>
-      <div class="apple-footnote">Red Bull is made of Liquid Brand Equity. Caffeine is merely an accessory.</div>
-    </div>
+    <!-- Track 2: HyperFrames Built-in Effect Components (Vignette + Film Grain) -->
+    <div class="hf-vignette"></div>
+    <div class="hf-grain-overlay"></div>
 
   </div>
 
-  <script src="animations.js"></script>
   <script>
-    // Static timeline registry mirror for hyperframes lint
-    // (implementations live in animations.js, loaded above; this just
-    // re-exports the same timeline objects under their composition ids).
     window.__timelines = window.__timelines || {};
-    window.__timelines["scene-1"] = tl1;
-    window.__timelines["scene-2"] = tl2;
-    window.__timelines["scene-3"] = tl3;
-    window.__timelines["scene-4"] = tl4;
-    window.__timelines["scene-5"] = tl5;
+    const hostTl = gsap.timeline({ paused: true });
+    window.__timelines["indian-ocean-short"] = hostTl;
   </script>
 </body>
 </html>
